@@ -19,7 +19,7 @@ In your server's `plugins/FoxMobMashers/config.yml`:
 
 ```yaml
 resource_pack:
-  url: "https://github.com/mcfoxcraft/Minecraft-Mob-Mashers-pack/releases/download/<tag>/foxmobmashers-resourcepack.zip"
+  url: "https://cdn.jsdelivr.net/gh/mcfoxcraft/Minecraft-Mob-Mashers-pack@<tag>/dist/foxmobmashers-resourcepack.zip"
   sha1: "<sha1 from release notes>"
   required: false
 music:
@@ -28,18 +28,22 @@ music:
   volume: 0.6
 ```
 
+The recommended URL points at jsDelivr (free global CDN fronted by Cloudflare + Fastly) for fast downloads everywhere. Each tag is a pinned, immutable snapshot. Release notes also list a fallback GitHub Releases URL if jsDelivr ever misbehaves.
+
 Clients cache packs by hash — bump both `url` and `sha1` after each release.
 
 ## Releasing
 
-Push a `v*` tag. GitHub Actions builds the zip, computes SHA-1, and uploads both to a release:
+Rebuild the zip locally, commit it to `dist/`, then tag:
 
 ```
-git tag v1.0.0
-git push origin v1.0.0
+zip -r dist/foxmobmashers-resourcepack.zip pack.mcmeta assets
+sha1sum dist/foxmobmashers-resourcepack.zip | cut -d' ' -f1 > dist/foxmobmashers-resourcepack.zip.sha1
+git add dist/ && git commit -m "Rebuild pack zip"
+git tag vX.Y.Z -m "…" && git push origin main vX.Y.Z
 ```
 
-Release notes include the SHA-1 and a copy-paste-ready `config.yml` snippet.
+The committed `dist/` zip is what jsDelivr serves, so it must match the current `assets/` contents — CI fails the release otherwise. On tag push, GitHub Actions uploads the same zip to a release and writes copy-paste config to the release notes.
 
 ## Credits
 
