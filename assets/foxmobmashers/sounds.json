@@ -1,0 +1,27 @@
+{
+  "music.run": {
+    "category": "music",
+    "sounds": [
+      { "name": "foxmobmashers:music/malevolent_melancholy", "stream": true },
+      { "name": "foxmobmashers:music/spectral_resonance", "stream": true },
+      { "name": "foxmobmashers:music/abyssal_echoes", "stream": true },
+      { "name": "foxmobmashers:music/forgotten_realms_of_doom", "stream": true },
+      { "name": "foxmobmashers:music/chaos_lullaby", "stream": true },
+      { "name": "foxmobmashers:music/mystic_veil_of_despair", "stream": true },
+      { "name": "foxmobmashers:music/the_unseen_legion", "stream": true },
+      { "name": "foxmobmashers:music/soulbound_desolation", "stream": true },
+      { "name": "foxmobmashers:music/nocturnal_sorcery", "stream": true },
+      { "name": "foxmobmashers:music/eternal_nightfall", "stream": true },
+      { "name": "foxmobmashers:music/cursed_shadows", "stream": true },
+      { "name": "foxmobmashers:music/the_haunting_eclipse", "stream": true },
+      { "name": "foxmobmashers:music/cryptic_enchantment", "stream": true },
+      { "name": "foxmobmashers:music/wraiths_in_the_mist", "stream": true },
+      { "name": "foxmobmashers:music/lament_of_the_damned", "stream": true },
+      { "name": "foxmobmashers:music/dreaded_nightmarescape", "stream": true },
+      { "name": "foxmobmashers:music/shadows_of_the_fallen", "stream": true },
+      { "name": "foxmobmashers:music/whispers_of_the_abyss", "stream": true },
+      { "name": "foxmobmashers:music/phantoms_requiem", "stream": true },
+      { "name": "foxmobmashers:music/eldritch_elegy", "stream": true }
+    ]
+  }
+}

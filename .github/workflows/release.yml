@@ -1,0 +1,42 @@
+name: Release resource pack
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build zip
+        id: zip
+        run: |
+          zip -r foxmobmashers-resourcepack.zip pack.mcmeta assets
+          SHA1=$(sha1sum foxmobmashers-resourcepack.zip | cut -d' ' -f1)
+          echo "sha1=$SHA1" >> "$GITHUB_OUTPUT"
+          echo "$SHA1" > foxmobmashers-resourcepack.zip.sha1
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            foxmobmashers-resourcepack.zip
+            foxmobmashers-resourcepack.zip.sha1
+          body: |
+            **SHA-1:** `${{ steps.zip.outputs.sha1 }}`
+
+            Add to your server's `plugins/FoxMobMashers/config.yml`:
+
+            ```yaml
+            resource_pack:
+              url: "${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/foxmobmashers-resourcepack.zip"
+              sha1: "${{ steps.zip.outputs.sha1 }}"
+              required: false
+            ```
+
+            Clients cache packs by hash — bump both values after each release.
