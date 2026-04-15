@@ -388,7 +388,7 @@ def main() -> None:
     # our under-left and under-right X anchors).
     ul_src = Image.open(src / "under" / "left" / "under_left1.png").convert("RGBA")
     strip = ul_src.crop((119, 0, 125, ul_src.height))  # 6px wide slice
-    connector_w = 72
+    connector_w = 112
     connector = Image.new("RGBA", (connector_w, ul_src.height), (0, 0, 0, 0))
     for x in range(0, connector_w, strip.width):
         connector.paste(strip, (x, 0), strip)
