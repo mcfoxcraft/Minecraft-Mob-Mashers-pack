@@ -85,12 +85,12 @@ PLATES = [
     # below the head/balance/time glyphs, matching the fine-tuned layout.
     # Canvas height follows TOP_PLATE_PADDED_HEIGHT so the down-shift
     # still works.
-    (0xE000, "top_left.png",         TOP_LEFT_NATURAL_H - 1, TOP_PLATE_PADDED_HEIGHT),
-    (0xE001, "top_right_base.png",   TOP_LEFT_NATURAL_H - 1, TOP_PLATE_PADDED_HEIGHT),
-    (0xE002, "top_right_east.png",   TOP_LEFT_NATURAL_H - 1, TOP_PLATE_PADDED_HEIGHT),
-    (0xE003, "top_right_north.png",  TOP_LEFT_NATURAL_H - 1, TOP_PLATE_PADDED_HEIGHT),
-    (0xE004, "top_right_south.png",  TOP_LEFT_NATURAL_H - 1, TOP_PLATE_PADDED_HEIGHT),
-    (0xE005, "top_right_west.png",   TOP_LEFT_NATURAL_H - 1, TOP_PLATE_PADDED_HEIGHT),
+    (0xE000, "top_left.png",         TOP_LEFT_NATURAL_H - 2, TOP_PLATE_PADDED_HEIGHT),
+    (0xE001, "top_right_base.png",   TOP_LEFT_NATURAL_H - 2, TOP_PLATE_PADDED_HEIGHT),
+    (0xE002, "top_right_east.png",   TOP_LEFT_NATURAL_H - 2, TOP_PLATE_PADDED_HEIGHT),
+    (0xE003, "top_right_north.png",  TOP_LEFT_NATURAL_H - 2, TOP_PLATE_PADDED_HEIGHT),
+    (0xE004, "top_right_south.png",  TOP_LEFT_NATURAL_H - 2, TOP_PLATE_PADDED_HEIGHT),
+    (0xE005, "top_right_west.png",   TOP_LEFT_NATURAL_H - 2, TOP_PLATE_PADDED_HEIGHT),
     # Under plates sit at hotbar level framing the hotbar.
     (0xE006, "under_left.png",        22, 86),
     (0xE007, "under_right.png",       22, 86),
@@ -169,9 +169,9 @@ CHARACTER_HEAD_CODEPOINTS = {
 # these offsets keep the elements' relative positions locked.
 # Decreased by 10 vs the original action-bar layout so the dynamic
 # content rides up inside the plate instead of sitting at its bottom.
-BALANCE_ASCENT_OFFSET =  0   # balance digits level with plate top
-TIME_ASCENT_OFFSET    = 14   # time digits 14 px below plate top
-HEAD_ASCENT_OFFSET    =  0   # head level with plate top
+BALANCE_ASCENT_OFFSET = -20  # balance digits 20 px ABOVE plate top
+TIME_ASCENT_OFFSET    =  -6  # time digits 6 px ABOVE plate top
+HEAD_ASCENT_OFFSET    = -20  # head 20 px ABOVE plate top
 DIGIT_BALANCE_ASCENT  = TOP_LEFT_NATURAL_H - BALANCE_ASCENT_OFFSET
 DIGIT_TIME_ASCENT     = TOP_LEFT_NATURAL_H - TIME_ASCENT_OFFSET
 # Level sits in the medallion diamond at the top-center of the bottom
