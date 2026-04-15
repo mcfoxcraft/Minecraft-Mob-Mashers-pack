@@ -170,7 +170,7 @@ CHARACTER_HEAD_CODEPOINTS = {
 # Decreased by 10 vs the original action-bar layout so the dynamic
 # content rides up inside the plate instead of sitting at its bottom.
 BALANCE_ASCENT_OFFSET = -24  # balance digits 24 px ABOVE plate top
-TIME_ASCENT_OFFSET    = -10  # time digits 10 px ABOVE plate top
+TIME_ASCENT_OFFSET    = -11  # time digits 11 px ABOVE plate top
 HEAD_ASCENT_OFFSET    = -16  # head 16 px ABOVE plate top
 DIGIT_BALANCE_ASCENT  = TOP_LEFT_NATURAL_H - BALANCE_ASCENT_OFFSET
 DIGIT_TIME_ASCENT     = TOP_LEFT_NATURAL_H - TIME_ASCENT_OFFSET
