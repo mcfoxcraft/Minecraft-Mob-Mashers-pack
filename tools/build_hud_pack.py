@@ -156,7 +156,7 @@ CHARACTER_HEAD_CODEPOINTS = {
     "mortaccio": 0xE30E,
 }
 DIGIT_BALANCE_ASCENT = 209
-DIGIT_TIME_ASCENT    = 186
+DIGIT_TIME_ASCENT    = 191
 # Level sits in the medallion diamond at the top-center of the bottom
 # HUD. Ascent alone can't go below 0, so to push level DOWN below
 # baseline we render its digit content at the bottom of a shorter
