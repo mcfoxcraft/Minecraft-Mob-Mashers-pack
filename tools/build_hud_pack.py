@@ -233,11 +233,11 @@ def slice_bar(src: Path, out_dir: Path, name: str,
         frame.save(out_dir / f"{name}_{i:02d}.png")
 
 
-def mask_regions(png_path: Path, regions, fill=(28, 27, 43, 255)) -> None:
-    """Recolor opaque pixels inside ``regions`` to ``fill`` so the label
-    text and bar art blend into the plate body. Pixels that were already
-    transparent stay transparent — this avoids painting big rectangles
-    outside the plate's body outline."""
+def mask_regions(png_path: Path, regions, fill=(0, 0, 0, 0)) -> None:
+    """Erase opaque pixels inside ``regions`` (set alpha=0 by default)
+    to cut away label text and bar art from the plate. Pixels that were
+    already transparent are untouched so the plate's overall silhouette
+    stays identical — only the letters/bars become holes."""
     im = Image.open(png_path).convert("RGBA")
     for (x1, y1, x2, y2) in regions:
         for y in range(y1, y2):
@@ -370,9 +370,16 @@ def main() -> None:
     stitch_animated(src / "under" / "right", "under_right",
                     TEXTURES_OUT / "under_right.png")
 
-    # Plate label/bar masking removed — the pack author will ship edited
-    # under_left1.png / under_right1.png source textures with the unwanted
-    # labels and bars already removed. We pass them through verbatim.
+    # Erase unwanted label text + bar art by setting those pixels to
+    # alpha=0. The plate body around them stays opaque so the silhouette
+    # of the plate is unchanged — only the labels/bars become holes.
+    mask_regions(TEXTURES_OUT / "under_left.png", [
+        (30, 33, 130, 45),   # ARMOR label row + ARMOR bar (keep HEART)
+    ])
+    mask_regions(TEXTURES_OUT / "under_right.png", [
+        (14, 33, 114, 45),   # AIR label row + AIR bar
+        (14, 46, 114, 55),   # FOOD label row + FOOD bar
+    ])
 
     # Static top-right base plate — also padded to top of screen.
     base_src = Image.open(src / "top_right" / "top_right.png").convert("RGBA")
