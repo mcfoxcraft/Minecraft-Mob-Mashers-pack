@@ -67,7 +67,12 @@ BAR_STEPS = 25
 # position. The skull, balance, and time ascents below are all expressed
 # as offsets from it, so raising this shifts the entire group upward
 # (plate + head + both text rows).
-TOP_PLATE_PADDED_HEIGHT = 255
+# 44 = the plate's natural content height. Previously padded to 255 to
+# lift the action-bar-rendered plate up toward the top of the screen;
+# now that the top-left group renders as a boss bar name (which is
+# already top-of-screen), we don't need the padding. The constraint is
+# plate_height >= max(balance/time/head ascents).
+TOP_PLATE_PADDED_HEIGHT = 44
 
 PLATES = [
     # (codepoint, output_png, ascent, height)
@@ -176,7 +181,7 @@ SMALL_DIGIT_CANVAS_H = 30   # level canvas (smaller, content at bottom)
 # Character head canvas. 16x16 head content pasted at the top of a tall
 # canvas so ascent=HEAD_ASCENT lifts it up onto the top-left plate.
 HEAD_CONTENT_PX = 16
-HEAD_CANVAS_H   = TOP_PLATE_PADDED_HEIGHT
+HEAD_CANVAS_H   = TOP_PLATE_PADDED_HEIGHT  # keeps ascent<=height
 HEAD_ASCENT     = TOP_PLATE_PADDED_HEIGHT - HEAD_ASCENT_OFFSET
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
