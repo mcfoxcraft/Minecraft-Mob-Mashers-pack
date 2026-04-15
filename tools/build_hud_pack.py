@@ -76,15 +76,21 @@ TOP_LEFT_NATURAL_H  = 44
 TOP_LEFT_DOWN_SHIFT = 50
 TOP_PLATE_PADDED_HEIGHT = TOP_LEFT_NATURAL_H + TOP_LEFT_DOWN_SHIFT
 
+# Animated top-left plate: 32 frame glyphs at consecutive PUA codepoints,
+# cycled plugin-side each tick. KEEP IN SYNC with HudGlyphs.TOP_LEFT_FRAME_0
+# and TOP_LEFT_FRAME_COUNT in the plugin.
+TOP_LEFT_FRAME_BASE  = 0xEA00
+TOP_LEFT_FRAME_COUNT = 32
+
 PLATES = [
     # (codepoint, output_png, ascent, height)
     # Minecraft enforces 0 <= ascent <= height, where ascent = pixels the
     # glyph extends above the text baseline. Content sits at the top of a
     # padded canvas; ascent == padded_height pushes that content upward.
-    # Plate ascent = natural height - 1 so the plate sits one pixel
-    # below the head/balance/time glyphs, matching the fine-tuned layout.
-    # Canvas height follows TOP_PLATE_PADDED_HEIGHT so the down-shift
-    # still works.
+    # Top-left plate is animated via 32 individual frame glyphs at
+    # 0xEA00..0xEA1F (see emit_font + output_animated_frames below).
+    # The static 0xE000 entry below is kept as a synonym of frame 0
+    # so any existing references still work.
     (0xE000, "top_left.png",         TOP_LEFT_NATURAL_H - 2, TOP_PLATE_PADDED_HEIGHT),
     (0xE001, "top_right_base.png",   TOP_LEFT_NATURAL_H - 2, TOP_PLATE_PADDED_HEIGHT),
     (0xE002, "top_right_east.png",   TOP_LEFT_NATURAL_H - 2, TOP_PLATE_PADDED_HEIGHT),
@@ -230,6 +236,31 @@ SPACE_BASE = 0xE100
 def die(msg: str) -> None:
     print(f"build_hud_pack: {msg}", file=sys.stderr)
     sys.exit(1)
+
+
+def output_animated_frames(src_dir: Path, frame_prefix: str,
+                           out_dir: Path, base_name: str,
+                           pad_to_height: int,
+                           content_at_bottom: bool = True) -> int:
+    """Write each of the source's 32 frames as its own padded PNG
+    (``<base_name>_00.png`` .. ``<base_name>_31.png``) so the plugin can
+    advance through them codepoint-by-codepoint each tick. Returns the
+    number of frames successfully written."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    count = 0
+    for i in range(1, 33):  # source frames are 1-indexed
+        src_frame = src_dir / f"{frame_prefix}{i}.png"
+        if not src_frame.is_file():
+            die(f"missing frame {i} in {src_dir}")
+        src_img = Image.open(src_frame).convert("RGBA")
+        w = src_img.width
+        canvas = Image.new("RGBA", (w, pad_to_height), (0, 0, 0, 0))
+        paste_y = pad_to_height - src_img.height if content_at_bottom else 0
+        canvas.paste(src_img, (0, paste_y))
+        canvas.putpixel((w - 1, paste_y), (0, 0, 0, 1))
+        canvas.save(out_dir / f"{base_name}_{(i - 1):02d}.png")
+        count += 1
+    return count
 
 
 def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path,
@@ -493,6 +524,18 @@ def emit_font(width_map: dict[int, int], character_head_ids: set[str]) -> None:
         advances[chr_(SPACE_BASE + i)] = offset
     providers.append({"type": "space", "advances": advances})
 
+    # Animated top-left plate frames — 32 consecutive glyphs the plugin
+    # cycles through each tick. Same ascent/height as the static plate
+    # above so they slot in at the identical on-screen position.
+    for i in range(TOP_LEFT_FRAME_COUNT):
+        providers.append({
+            "type": "bitmap",
+            "file": f"foxmobmashers:hud/top_left_frames/top_left_{i:02d}.png",
+            "ascent": TOP_LEFT_NATURAL_H - 2,
+            "height": TOP_PLATE_PADDED_HEIGHT,
+            "chars": [chr_(TOP_LEFT_FRAME_BASE + i)],
+        })
+
     # Placeholder skull glyph — fallback when no per-character head is
     # shipped for the player's selected character. 16x16 content at the
     # top of a tall padded canvas, same geometry as character heads.
@@ -561,6 +604,12 @@ def main() -> None:
                     TEXTURES_OUT / "top_left.png",
                     pad_to_height=TOP_PLATE_PADDED_HEIGHT,
                     content_at_bottom=True)
+    # Full 32-frame animation: one PNG per frame, addressed by its own
+    # codepoint so the plugin can step through them per tick.
+    output_animated_frames(src / "hud_top_left", "top_left",
+                           TEXTURES_OUT / "top_left_frames", "top_left",
+                           pad_to_height=TOP_PLATE_PADDED_HEIGHT,
+                           content_at_bottom=True)
     stitch_animated(src / "top_right" / "east",  "east",
                     TEXTURES_OUT / "top_right_east.png",
                     pad_to_height=TOP_PLATE_PADDED_HEIGHT,
