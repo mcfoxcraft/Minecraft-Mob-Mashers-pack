@@ -112,9 +112,9 @@ DIGIT_PATTERNS = {
 # time uses a lower ascent so they stack vertically on the plate.
 DIGIT_BASE_BALANCE = 0xE200  # 0..9 at 0xE200..0xE209, ':' at 0xE20A
 DIGIT_BASE_TIME    = 0xE220  # 0..9 at 0xE220..0xE229, ':' at 0xE22A
-DIGIT_BALANCE_ASCENT = 102
-DIGIT_TIME_ASCENT    = 92
-DIGIT_CANVAS_H       = 102  # must be >= max(ascent) for ascent<=height rule
+DIGIT_BALANCE_ASCENT = 117
+DIGIT_TIME_ASCENT    = 107
+DIGIT_CANVAS_H       = 120  # must be >= max(ascent) for ascent<=height rule
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
