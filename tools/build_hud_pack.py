@@ -112,8 +112,10 @@ DIGIT_PATTERNS = {
 # time uses a lower ascent so they stack vertically on the plate.
 DIGIT_BASE_BALANCE = 0xE200  # 0..9 at 0xE200..0xE209, ':' at 0xE20A
 DIGIT_BASE_TIME    = 0xE220  # 0..9 at 0xE220..0xE229, ':' at 0xE22A
+DIGIT_BASE_LEVEL   = 0xE240  # 0..9 at 0xE240..0xE249, ':' at 0xE24A
 DIGIT_BALANCE_ASCENT = 215
 DIGIT_TIME_ASCENT    = 205
+DIGIT_LEVEL_ASCENT   = 195
 DIGIT_CANVAS_H       = 220  # must be >= max(ascent) for ascent<=height rule
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
@@ -310,10 +312,12 @@ def emit_font(width_map: dict[int, int]) -> None:
         advances[chr_(SPACE_BASE + i)] = offset
     providers.append({"type": "space", "advances": advances})
 
-    # Digit glyphs for on-plate readouts (balance + time). Same textures,
-    # different ascents for the two rows so the values stack vertically.
+    # Digit glyphs for on-plate readouts (balance + time + level). Same
+    # textures, different ascents per row so the values stack vertically
+    # on the top-left plate.
     for base_cp, ascent in [(DIGIT_BASE_BALANCE, DIGIT_BALANCE_ASCENT),
-                             (DIGIT_BASE_TIME, DIGIT_TIME_ASCENT)]:
+                             (DIGIT_BASE_TIME, DIGIT_TIME_ASCENT),
+                             (DIGIT_BASE_LEVEL, DIGIT_LEVEL_ASCENT)]:
         for i, ch in enumerate("0123456789"):
             providers.append({
                 "type": "bitmap",
