@@ -67,12 +67,14 @@ BAR_STEPS = 25
 # position. The skull, balance, and time ascents below are all expressed
 # as offsets from it, so raising this shifts the entire group upward
 # (plate + head + both text rows).
-# 44 = the plate's natural content height. Previously padded to 255 to
-# lift the action-bar-rendered plate up toward the top of the screen;
-# now that the top-left group renders as a boss bar name (which is
-# already top-of-screen), we don't need the padding. The constraint is
-# plate_height >= max(balance/time/head ascents).
-TOP_PLATE_PADDED_HEIGHT = 44
+# Natural height of the plate's content (44) plus TOP_LEFT_DOWN_SHIFT
+# of extra rows below the content. Raising TOP_LEFT_DOWN_SHIFT pushes
+# the entire boss-bar-rendered group DOWNWARD on screen: every glyph's
+# canvas grows by that amount and its content stays bottom-anchored,
+# so with the ascent unchanged the visible pixels slide lower.
+TOP_LEFT_NATURAL_H  = 44
+TOP_LEFT_DOWN_SHIFT = 50
+TOP_PLATE_PADDED_HEIGHT = TOP_LEFT_NATURAL_H + TOP_LEFT_DOWN_SHIFT
 
 PLATES = [
     # (codepoint, output_png, ascent, height)
@@ -164,8 +166,8 @@ CHARACTER_HEAD_CODEPOINTS = {
 BALANCE_ASCENT_OFFSET = 10   # balance digits 10 px below plate top
 TIME_ASCENT_OFFSET    = 24   # time digits 24 px below plate top
 HEAD_ASCENT_OFFSET    = 10   # head 10 px below plate top
-DIGIT_BALANCE_ASCENT  = TOP_PLATE_PADDED_HEIGHT - BALANCE_ASCENT_OFFSET
-DIGIT_TIME_ASCENT     = TOP_PLATE_PADDED_HEIGHT - TIME_ASCENT_OFFSET
+DIGIT_BALANCE_ASCENT  = TOP_LEFT_NATURAL_H - BALANCE_ASCENT_OFFSET
+DIGIT_TIME_ASCENT     = TOP_LEFT_NATURAL_H - TIME_ASCENT_OFFSET
 # Level sits in the medallion diamond at the top-center of the bottom
 # HUD. Ascent alone can't go below 0, so to push level DOWN below
 # baseline we render its digit content at the bottom of a shorter
@@ -182,7 +184,7 @@ SMALL_DIGIT_CANVAS_H = 30   # level canvas (smaller, content at bottom)
 # canvas so ascent=HEAD_ASCENT lifts it up onto the top-left plate.
 HEAD_CONTENT_PX = 16
 HEAD_CANVAS_H   = TOP_PLATE_PADDED_HEIGHT  # keeps ascent<=height
-HEAD_ASCENT     = TOP_PLATE_PADDED_HEIGHT - HEAD_ASCENT_OFFSET
+HEAD_ASCENT     = TOP_LEFT_NATURAL_H - HEAD_ASCENT_OFFSET
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
@@ -225,7 +227,8 @@ def die(msg: str) -> None:
 
 
 def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path,
-                    pad_to_height: int = 0) -> None:
+                    pad_to_height: int = 0,
+                    content_at_bottom: bool = False) -> None:
     """Copy frame 1 as the plate texture, optionally padded with
     transparent rows at the bottom.
 
@@ -253,14 +256,13 @@ def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path,
     src_img = Image.open(frame1).convert("RGBA")
     w = src_img.width
     padded = Image.new("RGBA", (w, pad_to_height), (0, 0, 0, 0))
-    padded.paste(src_img, (0, 0))
-    # Sentinel kept inside the existing content box — putting it at
-    # pad_to_height-1 made MC render the full canvas extent as a ghost
-    # outline because the glyph's bounding box then spanned the full
-    # padded area. Keeping the sentinel in the top content rows means
-    # advance stays pinned to the source width while the glyph's
-    # vertical extent stays the content height.
-    padded.putpixel((w - 1, 0), (0, 0, 0, 1))
+    paste_y = pad_to_height - src_img.height if content_at_bottom else 0
+    padded.paste(src_img, (0, paste_y))
+    # Sentinel next to the content's top-right edge so MC doesn't
+    # auto-crop transparent columns and collapse the glyph's advance,
+    # but also doesn't extend the glyph's vertical bounding box to the
+    # full padded canvas height.
+    padded.putpixel((w - 1, paste_y), (0, 0, 0, 1))
     padded.save(out_path)
 
 
@@ -310,10 +312,11 @@ def extract_head_from_skin(skin_png: Image.Image) -> Image.Image:
     head8.alpha_composite(hat)
     head = head8.resize((HEAD_CONTENT_PX, HEAD_CONTENT_PX), Image.NEAREST)
     canvas = Image.new("RGBA", (HEAD_CONTENT_PX, HEAD_CANVAS_H), (0, 0, 0, 0))
-    canvas.paste(head, (0, 0))
-    # Sentinel pixel at top-right of canvas so MC doesn't auto-crop the
-    # glyph's advance down when the rest of the canvas is transparent.
-    canvas.putpixel((HEAD_CONTENT_PX - 1, 0), (255, 255, 255, 1))
+    # Content bottom-anchored so the TOP_LEFT_DOWN_SHIFT padding pushes
+    # the visible head downward with the rest of the group.
+    paste_y = HEAD_CANVAS_H - HEAD_CONTENT_PX
+    canvas.paste(head, (0, paste_y))
+    canvas.putpixel((HEAD_CONTENT_PX - 1, paste_y), (255, 255, 255, 1))
     return canvas
 
 
@@ -395,8 +398,9 @@ def render_placeholder_skull(out_path: Path) -> None:
                 head8.putpixel((x, y), (220, 220, 210, 255))
     head = head8.resize((HEAD_CONTENT_PX, HEAD_CONTENT_PX), Image.NEAREST)
     canvas = Image.new("RGBA", (HEAD_CONTENT_PX, HEAD_CANVAS_H), (0, 0, 0, 0))
-    canvas.paste(head, (0, 0))
-    canvas.putpixel((HEAD_CONTENT_PX - 1, 0), (255, 255, 255, 1))
+    paste_y = HEAD_CANVAS_H - HEAD_CONTENT_PX
+    canvas.paste(head, (0, paste_y))
+    canvas.putpixel((HEAD_CONTENT_PX - 1, paste_y), (255, 255, 255, 1))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(out_path)
 
@@ -544,24 +548,29 @@ def main() -> None:
         shutil.rmtree(TEXTURES_OUT)
     TEXTURES_OUT.mkdir(parents=True)
 
-    # Top plates pad to TOP_PLATE_PADDED_HEIGHT so ascent=PADDED_HEIGHT
-    # lifts the content to the top of the screen. Under plates stay at
-    # their native size — they land at hotbar level via smaller ascent.
+    # Top plates: content bottom-anchored in a canvas padded by
+    # TOP_LEFT_DOWN_SHIFT. With ascent unchanged the visible plate art
+    # slides downward on screen by the same number of pixels.
     stitch_animated(src / "hud_top_left", "top_left",
                     TEXTURES_OUT / "top_left.png",
-                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT,
+                    content_at_bottom=True)
     stitch_animated(src / "top_right" / "east",  "east",
                     TEXTURES_OUT / "top_right_east.png",
-                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT,
+                    content_at_bottom=True)
     stitch_animated(src / "top_right" / "north", "north",
                     TEXTURES_OUT / "top_right_north.png",
-                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT,
+                    content_at_bottom=True)
     stitch_animated(src / "top_right" / "south", "south",
                     TEXTURES_OUT / "top_right_south.png",
-                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT,
+                    content_at_bottom=True)
     stitch_animated(src / "top_right" / "west",  "west",
                     TEXTURES_OUT / "top_right_west.png",
-                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT,
+                    content_at_bottom=True)
     stitch_animated(src / "under" / "left",  "under_left",
                     TEXTURES_OUT / "under_left.png")
     stitch_animated(src / "under" / "right", "under_right",
@@ -573,13 +582,15 @@ def main() -> None:
     # Plate-texture masking disabled — the user is supplying hand-edited
     # under_left.png / under_right.png.
 
-    # Static top-right base plate — also padded to top of screen.
+    # Static top-right base plate — bottom-anchored in the padded canvas
+    # to match the animated plates.
     base_src = Image.open(src / "top_right" / "top_right.png").convert("RGBA")
     padded = Image.new("RGBA",
                        (base_src.width, TOP_PLATE_PADDED_HEIGHT),
                        (0, 0, 0, 0))
-    padded.paste(base_src, (0, 0))
-    padded.putpixel((base_src.width - 1, 0), (0, 0, 0, 1))
+    paste_y = TOP_PLATE_PADDED_HEIGHT - base_src.height
+    padded.paste(base_src, (0, paste_y))
+    padded.putpixel((base_src.width - 1, paste_y), (0, 0, 0, 1))
     padded.save(TEXTURES_OUT / "top_right_base.png")
 
     # Graveyard avatar — sourced from the heads dir if present, otherwise we
@@ -615,7 +626,10 @@ def main() -> None:
     # Custom digit glyphs. Balance + time: large 5x7 at canvas-top so
     # high ascent lifts them up. Level: compact 3x5 at canvas-BOTTOM so
     # low ascent drops them below baseline into the medallion.
-    render_digits(TEXTURES_OUT / "digits", DIGIT_PATTERNS, DIGIT_CANVAS_H)
+    # Content bottom-anchored so the TOP_LEFT_DOWN_SHIFT padding in
+    # DIGIT_CANVAS_H shifts the balance/time digits downward on screen.
+    render_digits(TEXTURES_OUT / "digits", DIGIT_PATTERNS, DIGIT_CANVAS_H,
+                  content_at_bottom=True)
     render_digits(TEXTURES_OUT / "digits_small", SMALL_DIGIT_PATTERNS,
                   SMALL_DIGIT_CANVAS_H, content_at_bottom=True)
 
