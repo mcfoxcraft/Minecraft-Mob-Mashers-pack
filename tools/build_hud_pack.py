@@ -125,22 +125,20 @@ BAR_BASES = {
 }
 BAR_SOURCES = {
     # (file, ascent, height). ascent must be ≤ height or MC aborts font
-    # load. Health bar uses ascent=5 height=40 with content at the bottom
-    # of the padded canvas, so it lands on the HEART label row near the
-    # plate's bottom while keeping a nonzero ascent.
-    "health":  ("health_bar.png",   5, 40),
+    # load. Health bar content sits in the bottom rows of a padded canvas
+    # so it lands on the plate's HEART label. Exp bar does the same but
+    # with an even lower ascent, dropping it onto the vanilla XP bar
+    # strip below the hotbar.
+    "health":  ("health_bar.png",  12, 40),
     "armor":   ("armor_bar.png",   15, 20),
-    "exp":     ("exp_bar.png",      3,  3),
+    "exp":     ("exp_bar.png",      3, 40),
 }
 BAR_PAD_HEIGHT = {
     "health": 40,
     "armor":  20,
+    "exp":    40,
 }
-# Bars whose padded canvas should anchor the source strip at the BOTTOM
-# of the canvas instead of the top. Combined with a small ascent, this
-# shifts the visible bar downward (below baseline) so it lands on the
-# lower half of the plate.
-BAR_CONTENT_AT_BOTTOM = {"health"}
+BAR_CONTENT_AT_BOTTOM = {"health", "exp"}
 
 # Horizontal positioning glyphs (space provider). Negative = backtrack,
 # positive = forward. We expose a power-of-two ladder so the composer can
@@ -373,13 +371,8 @@ def main() -> None:
     # Erase unwanted label text + bar art by setting those pixels to
     # alpha=0. The plate body around them stays opaque so the silhouette
     # of the plate is unchanged — only the labels/bars become holes.
-    mask_regions(TEXTURES_OUT / "under_left.png", [
-        (30, 33, 130, 45),   # ARMOR label row + ARMOR bar (keep HEART)
-    ])
-    mask_regions(TEXTURES_OUT / "under_right.png", [
-        (14, 33, 114, 45),   # AIR label row + AIR bar
-        (14, 46, 114, 55),   # FOOD label row + FOOD bar
-    ])
+    # Plate-texture masking disabled — the user is supplying hand-edited
+    # under_left.png / under_right.png.
 
     # Static top-right base plate — also padded to top of screen.
     base_src = Image.open(src / "top_right" / "top_right.png").convert("RGBA")
@@ -409,6 +402,16 @@ def main() -> None:
         slice_bar(src / fname, TEXTURES_OUT / bar, bar,
                   pad_to_height=BAR_PAD_HEIGHT.get(bar, 0),
                   content_at_bottom=(bar in BAR_CONTENT_AT_BOTTOM))
+    # If a local override exists, swap it in for the final plate texture.
+    # The user hand-edits under_left.png / under_right.png (e.g. to erase
+    # label art) and drops them under tools/overrides/ — build script
+    # copies them over the stitched output.
+    overrides = Path(__file__).resolve().parent / "overrides"
+    for name in ("under_left.png", "under_right.png"):
+        candidate = overrides / name
+        if candidate.is_file():
+            shutil.copy(candidate, TEXTURES_OUT / name)
+            print(f"override: {candidate} -> {TEXTURES_OUT / name}")
 
     # Custom digit glyphs for on-plate balance/time readouts.
     render_digits(TEXTURES_OUT / "digits")
