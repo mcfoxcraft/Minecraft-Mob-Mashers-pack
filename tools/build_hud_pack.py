@@ -108,25 +108,20 @@ def die(msg: str) -> None:
 
 
 def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path) -> None:
-    """Concatenate 32 frames vertically into one strip + write .mcmeta."""
-    frames = [src_dir / f"{frame_prefix}{i}.png" for i in range(1, 33)]
-    missing = [f for f in frames if not f.is_file()]
-    if missing:
-        die(f"missing frames in {src_dir}: {[m.name for m in missing[:3]]}...")
-    images = [Image.open(f).convert("RGBA") for f in frames]
-    w = images[0].width
-    h = images[0].height
-    if any(img.size != (w, h) for img in images):
-        die(f"frame size mismatch in {src_dir}")
-    strip = Image.new("RGBA", (w, h * len(images)), (0, 0, 0, 0))
-    for i, img in enumerate(images):
-        strip.paste(img, (0, i * h))
+    """Copy just frame 1 as the plate texture.
+
+    Font bitmap providers do not respect the .mcmeta animation spec that
+    block/item textures use — Minecraft treats the whole PNG as a single
+    glyph and scales it to match ``height``, turning a 32-frame vertical
+    strip into a sliver ~3 pixels wide. Until we find a pack-side way to
+    animate font glyphs (probably requires shader work), we ship one
+    frame and accept a static plate.
+    """
+    frame1 = src_dir / f"{frame_prefix}1.png"
+    if not frame1.is_file():
+        die(f"missing frame 1 in {src_dir}")
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    strip.save(out_path)
-    mcmeta = {"animation": {"frametime": FRAMETIME_TICKS, "interpolate": False}}
-    out_path.with_suffix(out_path.suffix + ".mcmeta").write_text(
-        json.dumps(mcmeta, indent=2) + "\n"
-    )
+    shutil.copy(frame1, out_path)
 
 
 def slice_bar(src: Path, out_dir: Path, name: str) -> None:
