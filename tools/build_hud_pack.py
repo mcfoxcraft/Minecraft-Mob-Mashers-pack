@@ -456,12 +456,14 @@ def emit_font(width_map: dict[int, int], character_head_ids: set[str]) -> None:
     providers.append({"type": "space", "advances": advances})
 
     # Placeholder skull glyph — fallback when no per-character head is
-    # shipped for the player's selected character.
+    # shipped for the player's selected character. 8x8 source texture
+    # rendered at height=16 so it displays at 2x (matches vanilla
+    # inventory-scale player heads).
     providers.append({
         "type": "bitmap",
         "file": "foxmobmashers:hud/skull.png",
-        "ascent": 8,
-        "height": 8,
+        "ascent": 16,
+        "height": 16,
         "chars": [chr_(SKULL_CODEPOINT)],
     })
 
@@ -472,8 +474,8 @@ def emit_font(width_map: dict[int, int], character_head_ids: set[str]) -> None:
         providers.append({
             "type": "bitmap",
             "file": f"foxmobmashers:hud/heads/{char_id}.png",
-            "ascent": 8,
-            "height": 8,
+            "ascent": 16,
+            "height": 16,
             "chars": [chr_(CHARACTER_HEAD_CODEPOINTS[char_id])],
         })
 
