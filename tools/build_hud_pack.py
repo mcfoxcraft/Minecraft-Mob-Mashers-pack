@@ -42,7 +42,13 @@ from PIL import Image
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TEXTURES_OUT = REPO_ROOT / "assets" / "foxmobmashers" / "textures" / "hud"
-FONT_OUT = REPO_ROOT / "assets" / "foxmobmashers" / "font" / "hud.json"
+# Override minecraft:default font instead of adding a namespaced font. Some
+# client versions silently drop custom-font style attributes on action bar
+# components (presumably a Paper<->Adventure serialization quirk), so the
+# glyphs fall back to unifont even when the pack is loaded. Overriding
+# default means the PUA codepoints resolve to our bitmaps from any component
+# without needing a Style.font() annotation on the server side.
+FONT_OUT = REPO_ROOT / "assets" / "minecraft" / "font" / "default.json"
 
 # 32 frames @ 2 ticks each = 3.2s loop. Matches the original BetterHud cadence
 # closely enough that the eye reads it as the same animation.
@@ -142,13 +148,20 @@ def slice_bar(src: Path, out_dir: Path, name: str) -> None:
 
 
 def emit_font(width_map: dict[int, int]) -> None:
-    """Write hud.json wiring every codepoint to its texture/advance.
+    """Write default.json wiring every codepoint to its texture/advance.
 
     width_map[codepoint] = source PNG width in pixels — needed so we can set
     the bitmap glyph's height without distorting it (Minecraft scales bitmap
     glyphs to `height` while preserving aspect ratio via the source image).
+
+    We override minecraft:default, so must first chain in the vanilla default
+    providers via reference so normal ASCII + unifont keep working.
     """
-    providers: list[dict] = []
+    providers: list[dict] = [
+        {"type": "reference", "id": "minecraft:include/space"},
+        {"type": "reference", "id": "minecraft:include/default"},
+        {"type": "reference", "id": "minecraft:include/unifont"},
+    ]
 
     def chr_(cp: int) -> str:
         return chr(cp)
