@@ -7,11 +7,25 @@ Client-side assets for the [FoxMobMashers](https://github.com/mcfoxcraft/Minecra
 ```
 pack.mcmeta
 assets/foxmobmashers/
-  sounds.json          # sound events exposed to the plugin
-  sounds/music/*.ogg   # track variants for music.run
+  sounds.json                # sound events exposed to the plugin
+  sounds/music/*.ogg         # track variants for music.run
+  font/hud.json              # generated; gitignored
+  textures/hud/...           # generated; gitignored
 ```
 
 The `music.run` sound event declares all tracks as variants. Minecraft picks one at random every time the plugin triggers the event, so rotation happens client-side with no plugin changes.
+
+## Animated HUD assets (generated)
+
+The HUD plates, compass, and bars are derived from a 3rd-party BetterHud-format source pack whose textures are not redistributable in source form. The build pipeline:
+
+1. Drop the source pack's `assets/` dir somewhere local (e.g. `tools/source/`).
+2. Run `python3 tools/build_hud_pack.py tools/source/`. This stitches per-frame sequences into vertical strips with `.mcmeta` animations, slices the bars into 25 reveal frames each, and writes `assets/foxmobmashers/font/hud.json` mapping every glyph to a Private-Use-Area codepoint.
+3. The generated `textures/hud/` and `font/hud.json` are gitignored — they live only in your local working tree and inside the release `dist/` zip.
+
+Codepoint allocations are the contract between this pack and the plugin's `HudGlyphs.java`. Edit both sides if you remap them.
+
+> ⚠ The current release flow uploads `dist/foxmobmashers-resourcepack.zip` to a public CDN. If your HUD source pack's license forbids public redistribution, switch the dist target to a private host before tagging.
 
 ## Using the pack
 
