@@ -155,7 +155,7 @@ BAR_SOURCES = {
     # so it lands on the plate's HEART label. Exp bar does the same but
     # with an even lower ascent, dropping it onto the vanilla XP bar
     # strip below the hotbar.
-    "health":  ("health_bar.png",  12, 40),
+    "health":  ("health_bar.png",  11, 40),
     "armor":   ("armor_bar.png",   15, 20),
     "exp":     ("exp_bar.png",      3, 40),
 }
