@@ -381,16 +381,15 @@ def main() -> None:
     # Custom digit glyphs for on-plate balance/time readouts.
     render_digits(TEXTURES_OUT / "digits")
 
-    # Synthesize middle connector by tiling a vertical plate-body slice
-    # from under_left.png across the hotbar gap. Sampling column 120 of
-    # the 144-wide source — that's a few pixels shy of the V-notch on the
-    # right edge, pure plate body. Output width = 72px (the gap between
-    # our under-left and under-right X anchors).
+    # Synthesize middle connector by tiling a 1-pixel-wide plate-body
+    # column from under_left.png across the hotbar gap. Column 95 is pure
+    # body (between labels and the right-edge V-notch), so tiling it gives
+    # a smooth banner with no repeating decorative artifacts.
     ul_src = Image.open(src / "under" / "left" / "under_left1.png").convert("RGBA")
-    strip = ul_src.crop((119, 0, 125, ul_src.height))  # 6px wide slice
+    strip = ul_src.crop((95, 0, 96, ul_src.height))  # 1px wide
     connector_w = 112
     connector = Image.new("RGBA", (connector_w, ul_src.height), (0, 0, 0, 0))
-    for x in range(0, connector_w, strip.width):
+    for x in range(connector_w):
         connector.paste(strip, (x, 0), strip)
     connector.putpixel((connector_w - 1, 0), (0, 0, 0, 1))
     connector.save(TEXTURES_OUT / "under_middle.png")
