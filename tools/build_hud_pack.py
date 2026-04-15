@@ -73,12 +73,11 @@ PLATES = [
     (0xE003, "top_right_north.png",  120, 120),
     (0xE004, "top_right_south.png",  120, 120),
     (0xE005, "top_right_west.png",   120, 120),
-    # Under plates sit at hotbar level framing the hotbar. ascent=30 puts
-    # the top of the plate 30px above baseline (near action-bar text line)
-    # and bottom 56px below baseline — the plate's middle brackets the
-    # hotbar row.
-    (0xE006, "under_left.png",        30, 86),
-    (0xE007, "under_right.png",       30, 86),
+    # Under plates sit at hotbar level framing the hotbar. ascent=22 lands
+    # the plate's middle at the hotbar-item row — 30 floated slightly too
+    # high, 15 dropped the bottom past the viewport.
+    (0xE006, "under_left.png",        22, 86),
+    (0xE007, "under_right.png",       22, 86),
     (0xE008, "graveyard_head.png",    16, 16),
 ]
 
@@ -96,10 +95,10 @@ BAR_BASES = {
 }
 BAR_SOURCES = {
     # (file, ascent, height). ascent must be ≤ height or MC aborts font
-    # load. health + armor inherit the under-plate's baseline position,
-    # offset up so each bar fits in its respective label row.
-    "health":  ("health_bar.png",   7,  7),
-    "armor":   ("armor_bar.png",   20, 20),
+    # load. Drops matching the under-plate's 8-px downward shift (30→22):
+    # health 7→5 (bar still on HEART row), armor 20→15 (still above HEART).
+    "health":  ("health_bar.png",   5,  7),
+    "armor":   ("armor_bar.png",   15, 20),
     "exp":     ("exp_bar.png",      3,  3),
 }
 # Bars with height > their source bar-strip height need vertical padding
