@@ -79,6 +79,9 @@ PLATES = [
     (0xE006, "under_left.png",        22, 86),
     (0xE007, "under_right.png",       22, 86),
     (0xE008, "graveyard_head.png",    16, 16),
+    # Synthesized middle connector — tiled plate body that bridges the gap
+    # across the hotbar between the left and right under plates.
+    (0xE009, "under_middle.png",      22, 86),
 ]
 
 # Top plates get padded to this pixel height so their ascent can reach
@@ -309,6 +312,20 @@ def main() -> None:
     for bar, (fname, _, _) in BAR_SOURCES.items():
         slice_bar(src / fname, TEXTURES_OUT / bar, bar,
                   pad_to_height=BAR_PAD_HEIGHT.get(bar, 0))
+
+    # Synthesize middle connector by tiling a vertical plate-body slice
+    # from under_left.png across the hotbar gap. Sampling column 120 of
+    # the 144-wide source — that's a few pixels shy of the V-notch on the
+    # right edge, pure plate body. Output width = 72px (the gap between
+    # our under-left and under-right X anchors).
+    ul_src = Image.open(src / "under" / "left" / "under_left1.png").convert("RGBA")
+    strip = ul_src.crop((119, 0, 125, ul_src.height))  # 6px wide slice
+    connector_w = 72
+    connector = Image.new("RGBA", (connector_w, ul_src.height), (0, 0, 0, 0))
+    for x in range(0, connector_w, strip.width):
+        connector.paste(strip, (x, 0), strip)
+    connector.putpixel((connector_w - 1, 0), (0, 0, 0, 1))
+    connector.save(TEXTURES_OUT / "under_middle.png")
 
     # Font JSON — width_map currently unused but kept threaded so it's easy
     # to introduce per-glyph aspect tweaks later without rewriting the call.
