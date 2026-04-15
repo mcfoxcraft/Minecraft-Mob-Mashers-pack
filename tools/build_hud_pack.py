@@ -112,9 +112,9 @@ DIGIT_PATTERNS = {
 # time uses a lower ascent so they stack vertically on the plate.
 DIGIT_BASE_BALANCE = 0xE200  # 0..9 at 0xE200..0xE209, ':' at 0xE20A
 DIGIT_BASE_TIME    = 0xE220  # 0..9 at 0xE220..0xE229, ':' at 0xE22A
-DIGIT_BALANCE_ASCENT = 117
-DIGIT_TIME_ASCENT    = 107
-DIGIT_CANVAS_H       = 120  # must be >= max(ascent) for ascent<=height rule
+DIGIT_BALANCE_ASCENT = 155
+DIGIT_TIME_ASCENT    = 145
+DIGIT_CANVAS_H       = 160  # must be >= max(ascent) for ascent<=height rule
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
@@ -125,18 +125,22 @@ BAR_BASES = {
 }
 BAR_SOURCES = {
     # (file, ascent, height). ascent must be ≤ height or MC aborts font
-    # load. Drops matching the under-plate's 8-px downward shift (30→22):
-    # health 7→5 (bar still on HEART row), armor 20→15 (still above HEART).
-    "health":  ("health_bar.png",   5,  7),
+    # load. Health bar uses ascent=5 height=40 with content at the bottom
+    # of the padded canvas, so it lands on the HEART label row near the
+    # plate's bottom while keeping a nonzero ascent.
+    "health":  ("health_bar.png",   5, 40),
     "armor":   ("armor_bar.png",   15, 20),
     "exp":     ("exp_bar.png",      3,  3),
 }
-# Bars with height > their source bar-strip height need vertical padding
-# on every slice so the canvas is tall enough for MC's ascent ≤ height
-# constraint. armor_pad_rows = BAR_SOURCES['armor'][2] - source_height.
 BAR_PAD_HEIGHT = {
-    "armor": 20,
+    "health": 40,
+    "armor":  20,
 }
+# Bars whose padded canvas should anchor the source strip at the BOTTOM
+# of the canvas instead of the top. Combined with a small ascent, this
+# shifts the visible bar downward (below baseline) so it lands on the
+# lower half of the plate.
+BAR_CONTENT_AT_BOTTOM = {"health"}
 
 # Horizontal positioning glyphs (space provider). Negative = backtrack,
 # positive = forward. We expose a power-of-two ladder so the composer can
@@ -195,7 +199,8 @@ def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path,
 
 
 def slice_bar(src: Path, out_dir: Path, name: str,
-              pad_to_height: int = 0) -> None:
+              pad_to_height: int = 0,
+              content_at_bottom: bool = False) -> None:
     """Write BAR_STEPS PNGs each revealing (i+1)/BAR_STEPS of the source bar.
 
     Every output is the FULL source size with a right-side transparency
@@ -218,13 +223,26 @@ def slice_bar(src: Path, out_dir: Path, name: str,
     w, src_h = base.size
     canvas_h = max(src_h, pad_to_height)
     out_dir.mkdir(parents=True, exist_ok=True)
+    paste_y = canvas_h - src_h if content_at_bottom else 0
     for i in range(BAR_STEPS):
         fill_px = round((i + 1) * w / BAR_STEPS)
         frame = Image.new("RGBA", (w, canvas_h), (0, 0, 0, 0))
         if fill_px > 0:
-            frame.paste(base.crop((0, 0, fill_px, src_h)), (0, 0))
+            frame.paste(base.crop((0, 0, fill_px, src_h)), (0, paste_y))
         frame.putpixel((w - 1, 0), (0, 0, 0, 1))
         frame.save(out_dir / f"{name}_{i:02d}.png")
+
+
+def mask_regions(png_path: Path, regions, fill=(28, 27, 43, 255)) -> None:
+    """Overwrite the given rectangles with ``fill`` to hide labels/bars
+    painted into a plate texture. Default fill is the plate's body color
+    (sampled from under_left.png)."""
+    im = Image.open(png_path).convert("RGBA")
+    for (x1, y1, x2, y2) in regions:
+        for y in range(y1, y2):
+            for x in range(x1, x2):
+                im.putpixel((x, y), fill)
+    im.save(png_path)
 
 
 def render_digits(out_dir: Path) -> None:
@@ -350,6 +368,17 @@ def main() -> None:
     stitch_animated(src / "under" / "right", "under_right",
                     TEXTURES_OUT / "under_right.png")
 
+    # Mask out labels/bars we don't use — ARMOR on under-left, AIR + FOOD
+    # on under-right. Keep HEART on under-left. Regions tuned from the
+    # 144x86 source plates; iterate here if any label bleeds through.
+    mask_regions(TEXTURES_OUT / "under_left.png", [
+        (30, 20, 140, 40),  # ARMOR label + bar (top-right section)
+    ])
+    mask_regions(TEXTURES_OUT / "under_right.png", [
+        (5,  20, 120, 40),  # AIR label + bar (upper section)
+        (5,  45, 120, 70),  # FOOD label + bar (lower section)
+    ])
+
     # Static top-right base plate — also padded to top of screen.
     base_src = Image.open(src / "top_right" / "top_right.png").convert("RGBA")
     padded = Image.new("RGBA",
@@ -376,7 +405,8 @@ def main() -> None:
     # Bar slices
     for bar, (fname, _, _) in BAR_SOURCES.items():
         slice_bar(src / fname, TEXTURES_OUT / bar, bar,
-                  pad_to_height=BAR_PAD_HEIGHT.get(bar, 0))
+                  pad_to_height=BAR_PAD_HEIGHT.get(bar, 0),
+                  content_at_bottom=(bar in BAR_CONTENT_AT_BOTTOM))
 
     # Custom digit glyphs for on-plate balance/time readouts.
     render_digits(TEXTURES_OUT / "digits")
