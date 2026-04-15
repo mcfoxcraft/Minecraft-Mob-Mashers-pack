@@ -108,6 +108,23 @@ DIGIT_PATTERNS = {
     ':': ["....", "..#.", "..#.", "....", "..#.", "..#.", "...."],
 }
 
+# Compact 3x5 digit patterns used for the level readout in the
+# medallion — visibly smaller than the 5x7 balance/time digits.
+SMALL_DIGIT_PATTERNS = {
+    '0': ["###", "#.#", "#.#", "#.#", "###"],
+    '1': [".#.", "##.", ".#.", ".#.", "###"],
+    '2': ["##.", "..#", ".#.", "#..", "###"],
+    '3': ["##.", "..#", ".#.", "..#", "##."],
+    '4': ["#.#", "#.#", "###", "..#", "..#"],
+    '5': ["###", "#..", "##.", "..#", "##."],
+    '6': [".##", "#..", "###", "#.#", "###"],
+    '7': ["###", "..#", "..#", ".#.", ".#."],
+    '8': ["###", "#.#", "###", "#.#", "###"],
+    '9': ["###", "#.#", "###", "..#", "##."],
+    ':': ["..", ".#", "..", ".#", ".."],
+}
+SMALL_DIGIT_ADVANCE = 4  # texture width 3 + 1 default spacing
+
 # Codepoint ranges for the digit providers. Balance uses one ascent,
 # time uses a lower ascent so they stack vertically on the plate.
 DIGIT_BASE_BALANCE = 0xE200  # 0..9 at 0xE200..0xE209, ':' at 0xE20A
@@ -118,7 +135,7 @@ DIGIT_TIME_ASCENT    = 205
 # Level sits in the medallion diamond at the top-center of the bottom
 # HUD (above the hotbar), so its ascent is much lower — just above
 # the action-bar baseline where the medallion art lands.
-DIGIT_LEVEL_ASCENT   = 18
+DIGIT_LEVEL_ASCENT   = 10
 DIGIT_CANVAS_H       = 220  # must be >= max(ascent) for ascent<=height rule
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
@@ -250,14 +267,14 @@ def mask_regions(png_path: Path, regions, fill=(0, 0, 0, 0)) -> None:
     im.save(png_path)
 
 
-def render_digits(out_dir: Path) -> None:
+def render_digits(out_dir: Path, patterns, canvas_h: int) -> None:
     """Draw each digit pattern into a tall padded canvas so the plate's
-    ascent range can reach it. Content sits at the top of a DIGIT_CANVAS_H
-    canvas with a sentinel pixel at top-right to pin advance."""
+    ascent range can reach it. Content sits at the top of a canvas_h-
+    tall canvas with a sentinel pixel at top-right to pin advance."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    for ch, rows in DIGIT_PATTERNS.items():
+    for ch, rows in patterns.items():
         w = max(len(r) for r in rows)
-        img = Image.new("RGBA", (w, DIGIT_CANVAS_H), (0, 0, 0, 0))
+        img = Image.new("RGBA", (w, canvas_h), (0, 0, 0, 0))
         for y, row in enumerate(rows):
             for x, c in enumerate(row):
                 if c == "#":
@@ -315,23 +332,24 @@ def emit_font(width_map: dict[int, int]) -> None:
         advances[chr_(SPACE_BASE + i)] = offset
     providers.append({"type": "space", "advances": advances})
 
-    # Digit glyphs for on-plate readouts (balance + time + level). Same
-    # textures, different ascents per row so the values stack vertically
-    # on the top-left plate.
-    for base_cp, ascent in [(DIGIT_BASE_BALANCE, DIGIT_BALANCE_ASCENT),
-                             (DIGIT_BASE_TIME, DIGIT_TIME_ASCENT),
-                             (DIGIT_BASE_LEVEL, DIGIT_LEVEL_ASCENT)]:
+    # Digit glyphs for on-plate readouts. Balance + time use 5x7 digits
+    # from digits/, level uses the compact 3x5 digits from digits_small/.
+    for base_cp, ascent, dir_ in [
+        (DIGIT_BASE_BALANCE, DIGIT_BALANCE_ASCENT, "digits"),
+        (DIGIT_BASE_TIME,    DIGIT_TIME_ASCENT,    "digits"),
+        (DIGIT_BASE_LEVEL,   DIGIT_LEVEL_ASCENT,   "digits_small"),
+    ]:
         for i, ch in enumerate("0123456789"):
             providers.append({
                 "type": "bitmap",
-                "file": f"foxmobmashers:hud/digits/{ch}.png",
+                "file": f"foxmobmashers:hud/{dir_}/{ch}.png",
                 "ascent": ascent,
                 "height": DIGIT_CANVAS_H,
                 "chars": [chr_(base_cp + i)],
             })
         providers.append({
             "type": "bitmap",
-            "file": "foxmobmashers:hud/digits/colon.png",
+            "file": f"foxmobmashers:hud/{dir_}/colon.png",
             "ascent": ascent,
             "height": DIGIT_CANVAS_H,
             "chars": [chr_(base_cp + 10)],
@@ -420,8 +438,10 @@ def main() -> None:
             shutil.copy(candidate, TEXTURES_OUT / name)
             print(f"override: {candidate} -> {TEXTURES_OUT / name}")
 
-    # Custom digit glyphs for on-plate balance/time readouts.
-    render_digits(TEXTURES_OUT / "digits")
+    # Custom digit glyphs. Balance + time use the larger 5x7 pixel set;
+    # level uses the compact 3x5 pixel set for the medallion readout.
+    render_digits(TEXTURES_OUT / "digits",       DIGIT_PATTERNS,       DIGIT_CANVAS_H)
+    render_digits(TEXTURES_OUT / "digits_small", SMALL_DIGIT_PATTERNS, DIGIT_CANVAS_H)
 
     # Synthesize middle connector by tiling a 1-pixel-wide plate-body
     # column from under_left.png across the hotbar gap. Column 95 is pure
