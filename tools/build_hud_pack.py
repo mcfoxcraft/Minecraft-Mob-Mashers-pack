@@ -150,7 +150,13 @@ def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path,
     w = src_img.width
     padded = Image.new("RGBA", (w, pad_to_height), (0, 0, 0, 0))
     padded.paste(src_img, (0, 0))
-    padded.putpixel((w - 1, pad_to_height - 1), (0, 0, 0, 1))
+    # Sentinel kept inside the existing content box — putting it at
+    # pad_to_height-1 made MC render the full canvas extent as a ghost
+    # outline because the glyph's bounding box then spanned the full
+    # padded area. Keeping the sentinel in the top content rows means
+    # advance stays pinned to the source width while the glyph's
+    # vertical extent stays the content height.
+    padded.putpixel((w - 1, 0), (0, 0, 0, 1))
     padded.save(out_path)
 
 
@@ -271,8 +277,7 @@ def main() -> None:
                        (base_src.width, TOP_PLATE_PADDED_HEIGHT),
                        (0, 0, 0, 0))
     padded.paste(base_src, (0, 0))
-    padded.putpixel((base_src.width - 1, TOP_PLATE_PADDED_HEIGHT - 1),
-                    (0, 0, 0, 1))
+    padded.putpixel((base_src.width - 1, 0), (0, 0, 0, 1))
     padded.save(TEXTURES_OUT / "top_right_base.png")
 
     # Graveyard avatar — sourced from the heads dir if present, otherwise we
