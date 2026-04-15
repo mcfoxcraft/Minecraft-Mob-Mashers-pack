@@ -234,14 +234,16 @@ def slice_bar(src: Path, out_dir: Path, name: str,
 
 
 def mask_regions(png_path: Path, regions, fill=(28, 27, 43, 255)) -> None:
-    """Overwrite the given rectangles with ``fill`` to hide labels/bars
-    painted into a plate texture. Default fill is the plate's body color
-    (sampled from under_left.png)."""
+    """Recolor opaque pixels inside ``regions`` to ``fill`` so the label
+    text and bar art blend into the plate body. Pixels that were already
+    transparent stay transparent — this avoids painting big rectangles
+    outside the plate's body outline."""
     im = Image.open(png_path).convert("RGBA")
     for (x1, y1, x2, y2) in regions:
         for y in range(y1, y2):
             for x in range(x1, x2):
-                im.putpixel((x, y), fill)
+                if im.getpixel((x, y))[3] >= 128:
+                    im.putpixel((x, y), fill)
     im.save(png_path)
 
 
@@ -369,14 +371,16 @@ def main() -> None:
                     TEXTURES_OUT / "under_right.png")
 
     # Mask out labels/bars we don't use — ARMOR on under-left, AIR + FOOD
-    # on under-right. Keep HEART on under-left. Regions tuned from the
-    # 144x86 source plates; iterate here if any label bleeds through.
+    # on under-right. Keep HEART on under-left. Coordinates match the
+    # pixel positions of the label text + bar art on the 144x86 source
+    # plates; mask_regions only touches already-opaque pixels so the
+    # bat/frame decoration around the bar stays intact.
     mask_regions(TEXTURES_OUT / "under_left.png", [
-        (30, 20, 140, 40),  # ARMOR label + bar (top-right section)
+        (30, 33, 130, 45),   # ARMOR label row + ARMOR bar (rows 33-44)
     ])
     mask_regions(TEXTURES_OUT / "under_right.png", [
-        (5,  20, 120, 40),  # AIR label + bar (upper section)
-        (5,  45, 120, 70),  # FOOD label + bar (lower section)
+        (14, 33, 114, 45),   # AIR label row + AIR bar
+        (14, 46, 114, 55),   # FOOD label row + FOOD bar
     ])
 
     # Static top-right base plate — also padded to top of screen.
