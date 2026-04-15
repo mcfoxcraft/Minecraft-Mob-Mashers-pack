@@ -90,6 +90,11 @@ PLATES = [
 # Top plates get padded to this pixel height so their ascent can reach
 # high enough to land near the top of the screen. Must match the
 # ascent/height values in PLATES above for the top-plate entries.
+#
+# This is the SINGLE source of truth for the top-left plate group's
+# vertical position. The skull, balance, and time ascents below are all
+# expressed as offsets from it, so raising TOP_PLATE_PADDED_HEIGHT
+# shifts the entire group upward (plate + head + both text rows).
 TOP_PLATE_PADDED_HEIGHT = 220
 
 # Custom digit glyphs used to render coin balance + run timer on top of
@@ -155,8 +160,15 @@ CHARACTER_HEAD_CODEPOINTS = {
     "giovanna":  0xE30D,
     "mortaccio": 0xE30E,
 }
-DIGIT_BALANCE_ASCENT = 210
-DIGIT_TIME_ASCENT    = 196
+# ── Top-left plate group ascent offsets (relative to TOP_PLATE_PADDED_HEIGHT) ──
+# Each offset is how many pixels BELOW the plate's top edge the glyph's
+# top renders. Raising TOP_PLATE_PADDED_HEIGHT lifts the whole group;
+# these offsets keep the elements' relative positions locked.
+BALANCE_ASCENT_OFFSET = 10   # balance digits 10 px below plate top
+TIME_ASCENT_OFFSET    = 24   # time digits 24 px below plate top
+HEAD_ASCENT_OFFSET    = 10   # head 10 px below plate top
+DIGIT_BALANCE_ASCENT  = TOP_PLATE_PADDED_HEIGHT - BALANCE_ASCENT_OFFSET
+DIGIT_TIME_ASCENT     = TOP_PLATE_PADDED_HEIGHT - TIME_ASCENT_OFFSET
 # Level sits in the medallion diamond at the top-center of the bottom
 # HUD. Ascent alone can't go below 0, so to push level DOWN below
 # baseline we render its digit content at the bottom of a shorter
@@ -171,7 +183,7 @@ SMALL_DIGIT_CANVAS_H = 30   # level canvas (smaller, content at bottom)
 # canvas so ascent=HEAD_ASCENT lifts it up onto the top-left plate.
 HEAD_CONTENT_PX = 16
 HEAD_CANVAS_H   = 220
-HEAD_ASCENT     = 210
+HEAD_ASCENT     = TOP_PLATE_PADDED_HEIGHT - HEAD_ASCENT_OFFSET
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
