@@ -130,6 +130,7 @@ SMALL_DIGIT_ADVANCE = 4  # texture width 3 + 1 default spacing
 DIGIT_BASE_BALANCE = 0xE200  # 0..9 at 0xE200..0xE209, ':' at 0xE20A
 DIGIT_BASE_TIME    = 0xE220  # 0..9 at 0xE220..0xE229, ':' at 0xE22A
 DIGIT_BASE_LEVEL   = 0xE240  # 0..9 at 0xE240..0xE249, ':' at 0xE24A
+SKULL_CODEPOINT    = 0xE300  # Placeholder skull icon for the character slot
 DIGIT_BALANCE_ASCENT = 215
 DIGIT_TIME_ASCENT    = 205
 # Level sits in the medallion diamond at the top-center of the bottom
@@ -257,6 +258,28 @@ def slice_bar(src: Path, out_dir: Path, name: str,
         frame.save(out_dir / f"{name}_{i:02d}.png")
 
 
+def render_placeholder_skull(out_path: Path) -> None:
+    """8x8 pixel-art skull on a transparent background. Overridable — if
+    tools/overrides/skull.png exists it wins (set in main())."""
+    pattern = [
+        ".######.",
+        "########",
+        "#.##.##.",  # eye sockets
+        "########",
+        "#.####.#",  # nose/mouth
+        "########",
+        "##.##.##",  # teeth
+        ".######.",
+    ]
+    img = Image.new("RGBA", (8, 8), (0, 0, 0, 0))
+    for y, row in enumerate(pattern):
+        for x, c in enumerate(row):
+            if c == "#":
+                img.putpixel((x, y), (220, 220, 210, 255))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    img.save(out_path)
+
+
 def mask_regions(png_path: Path, regions, fill=(0, 0, 0, 0)) -> None:
     """Erase opaque pixels inside ``regions`` (set alpha=0 by default)
     to cut away label text and bar art from the plate. Pixels that were
@@ -338,6 +361,17 @@ def emit_font(width_map: dict[int, int]) -> None:
     for i, offset in enumerate(SPACE_OFFSETS):
         advances[chr_(SPACE_BASE + i)] = offset
     providers.append({"type": "space", "advances": advances})
+
+    # Placeholder skull glyph — character slot on the top-left plate.
+    # Texture is 8x8; a tall canvas-friendly ascent is NOT needed because
+    # a small 8-pixel skull is fine at its native render size.
+    providers.append({
+        "type": "bitmap",
+        "file": "foxmobmashers:hud/skull.png",
+        "ascent": 8,
+        "height": 8,
+        "chars": [chr_(SKULL_CODEPOINT)],
+    })
 
     # Digit glyphs for on-plate readouts. Balance + time use 5x7 digits
     # from digits/, level uses the compact 3x5 digits from digits_small/.
@@ -451,6 +485,15 @@ def main() -> None:
     render_digits(TEXTURES_OUT / "digits", DIGIT_PATTERNS, DIGIT_CANVAS_H)
     render_digits(TEXTURES_OUT / "digits_small", SMALL_DIGIT_PATTERNS,
                   SMALL_DIGIT_CANVAS_H, content_at_bottom=True)
+
+    # Placeholder skull icon for the character slot on the top-left plate.
+    # overrides/skull.png (if present) wins so a proper per-character head
+    # can be dropped in later.
+    render_placeholder_skull(TEXTURES_OUT / "skull.png")
+    skull_override = Path(__file__).resolve().parent / "overrides" / "skull.png"
+    if skull_override.is_file():
+        shutil.copy(skull_override, TEXTURES_OUT / "skull.png")
+        print(f"override: {skull_override} -> {TEXTURES_OUT / 'skull.png'}")
 
     # Synthesize middle connector by tiling a 1-pixel-wide plate-body
     # column from under_left.png across the hotbar gap. Column 95 is pure
