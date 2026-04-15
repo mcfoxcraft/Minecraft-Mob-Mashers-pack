@@ -63,22 +63,29 @@ BAR_STEPS = 25
 PLATES = [
     # (codepoint, output_png, ascent, height)
     # Minecraft enforces 0 <= ascent <= height, where ascent = pixels the
-    # glyph extends above the text baseline. ascent == height puts the
-    # glyph fully above baseline (sitting on top of the action-bar text);
-    # smaller values drop it partway into/below the text line. Our plates
-    # all use ascent == height so they stack above the readable text.
-    (0xE000, "top_left.png",          44, 44),
-    (0xE001, "top_right_base.png",    44, 44),
-    (0xE002, "top_right_east.png",    44, 44),
-    (0xE003, "top_right_north.png",   44, 44),
-    (0xE004, "top_right_south.png",   44, 44),
-    (0xE005, "top_right_west.png",    44, 44),
-    # Under plates drop to ascent=30 so they sit mostly below the baseline
-    # at hotbar level instead of floating above the action-bar text line.
+    # glyph extends above the text baseline. To push top plates up toward
+    # the upper screen we pad the source texture's *height* with transparent
+    # rows below the content and set ascent = padded_height. The 44px-tall
+    # plate content then renders near the top of a 200px-tall canvas that
+    # reaches 200 pixels above the action-bar baseline.
+    (0xE000, "top_left.png",         200, 200),
+    (0xE001, "top_right_base.png",   200, 200),
+    (0xE002, "top_right_east.png",   200, 200),
+    (0xE003, "top_right_north.png",  200, 200),
+    (0xE004, "top_right_south.png",  200, 200),
+    (0xE005, "top_right_west.png",   200, 200),
+    # Under plates stay at hotbar level. ascent=30, height=86 puts top of
+    # glyph 30px above baseline, bottom 56px below baseline — sits across
+    # the hotbar + extension area.
     (0xE006, "under_left.png",        30, 86),
     (0xE007, "under_right.png",       30, 86),
     (0xE008, "graveyard_head.png",    16, 16),
 ]
+
+# Top plates get padded to this pixel height so their ascent can reach
+# high enough to land near the top of the screen. Must match the
+# ascent/height values in PLATES above for the top-plate entries.
+TOP_PLATE_PADDED_HEIGHT = 200
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
@@ -88,8 +95,12 @@ BAR_BASES = {
     "exp":     0xE060,
 }
 BAR_SOURCES = {
-    "health":  ("health_bar.png",   7,  7),  # ascent == height: fully above baseline
-    "armor":   ("armor_bar.png",    7,  7),
+    # (file, ascent, height)
+    # Armor bar sits at ascent=16 (above the HEART row), health bar at
+    # ascent=7 (aligned with the under-plate's HEART label). Exp bar
+    # stays low at the hotbar's top edge.
+    "health":  ("health_bar.png",   7,  7),
+    "armor":   ("armor_bar.png",   20,  7),
     "exp":     ("exp_bar.png",      3,  3),
 }
 
@@ -109,8 +120,10 @@ def die(msg: str) -> None:
     sys.exit(1)
 
 
-def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path) -> None:
-    """Copy just frame 1 as the plate texture.
+def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path,
+                    pad_to_height: int = 0) -> None:
+    """Copy frame 1 as the plate texture, optionally padded with
+    transparent rows at the bottom.
 
     Font bitmap providers do not respect the .mcmeta animation spec that
     block/item textures use — Minecraft treats the whole PNG as a single
@@ -118,12 +131,27 @@ def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path) -> None:
     strip into a sliver ~3 pixels wide. Until we find a pack-side way to
     animate font glyphs (probably requires shader work), we ship one
     frame and accept a static plate.
+
+    When ``pad_to_height`` is nonzero, the frame is placed at the TOP of
+    a transparent canvas of that height. Combined with a large ``ascent``
+    value, this pushes the visible content toward the top of the screen
+    while keeping the rest of the glyph transparent. A sentinel alpha=1
+    pixel at bottom-right pins the advance so MC's auto-crop doesn't
+    collapse the padded columns.
     """
     frame1 = src_dir / f"{frame_prefix}1.png"
     if not frame1.is_file():
         die(f"missing frame 1 in {src_dir}")
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy(frame1, out_path)
+    if pad_to_height <= 0:
+        shutil.copy(frame1, out_path)
+        return
+    src_img = Image.open(frame1).convert("RGBA")
+    w = src_img.width
+    padded = Image.new("RGBA", (w, pad_to_height), (0, 0, 0, 0))
+    padded.paste(src_img, (0, 0))
+    padded.putpixel((w - 1, pad_to_height - 1), (0, 0, 0, 1))
+    padded.save(out_path)
 
 
 def slice_bar(src: Path, out_dir: Path, name: str) -> None:
@@ -214,17 +242,38 @@ def main() -> None:
         shutil.rmtree(TEXTURES_OUT)
     TEXTURES_OUT.mkdir(parents=True)
 
-    # Animated plates
-    stitch_animated(src / "hud_top_left", "top_left",      TEXTURES_OUT / "top_left.png")
-    stitch_animated(src / "top_right" / "east",  "east",   TEXTURES_OUT / "top_right_east.png")
-    stitch_animated(src / "top_right" / "north", "north",  TEXTURES_OUT / "top_right_north.png")
-    stitch_animated(src / "top_right" / "south", "south",  TEXTURES_OUT / "top_right_south.png")
-    stitch_animated(src / "top_right" / "west",  "west",   TEXTURES_OUT / "top_right_west.png")
-    stitch_animated(src / "under" / "left",  "under_left",  TEXTURES_OUT / "under_left.png")
-    stitch_animated(src / "under" / "right", "under_right", TEXTURES_OUT / "under_right.png")
+    # Top plates pad to TOP_PLATE_PADDED_HEIGHT so ascent=PADDED_HEIGHT
+    # lifts the content to the top of the screen. Under plates stay at
+    # their native size — they land at hotbar level via smaller ascent.
+    stitch_animated(src / "hud_top_left", "top_left",
+                    TEXTURES_OUT / "top_left.png",
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+    stitch_animated(src / "top_right" / "east",  "east",
+                    TEXTURES_OUT / "top_right_east.png",
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+    stitch_animated(src / "top_right" / "north", "north",
+                    TEXTURES_OUT / "top_right_north.png",
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+    stitch_animated(src / "top_right" / "south", "south",
+                    TEXTURES_OUT / "top_right_south.png",
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+    stitch_animated(src / "top_right" / "west",  "west",
+                    TEXTURES_OUT / "top_right_west.png",
+                    pad_to_height=TOP_PLATE_PADDED_HEIGHT)
+    stitch_animated(src / "under" / "left",  "under_left",
+                    TEXTURES_OUT / "under_left.png")
+    stitch_animated(src / "under" / "right", "under_right",
+                    TEXTURES_OUT / "under_right.png")
 
-    # Static plates
-    shutil.copy(src / "top_right" / "top_right.png", TEXTURES_OUT / "top_right_base.png")
+    # Static top-right base plate — also padded to top of screen.
+    base_src = Image.open(src / "top_right" / "top_right.png").convert("RGBA")
+    padded = Image.new("RGBA",
+                       (base_src.width, TOP_PLATE_PADDED_HEIGHT),
+                       (0, 0, 0, 0))
+    padded.paste(base_src, (0, 0))
+    padded.putpixel((base_src.width - 1, TOP_PLATE_PADDED_HEIGHT - 1),
+                    (0, 0, 0, 1))
+    padded.save(TEXTURES_OUT / "top_right_base.png")
 
     # Graveyard avatar — sourced from the heads dir if present, otherwise we
     # just skip silently and the avatar glyph renders blank.
