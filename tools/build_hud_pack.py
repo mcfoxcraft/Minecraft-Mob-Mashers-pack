@@ -89,6 +89,33 @@ PLATES = [
 # ascent/height values in PLATES above for the top-plate entries.
 TOP_PLATE_PADDED_HEIGHT = 120
 
+# Custom digit glyphs used to render coin balance + run timer on top of
+# the top-left plate. 5 pixel cols * 7 rows per digit, padded to a tall
+# canvas so a high ascent can land the content inside the plate art.
+DIGIT_CELL_W = 5
+DIGIT_CELL_H = 7
+DIGIT_PATTERNS = {
+    '0': [".###.", "#...#", "#..##", "#.#.#", "##..#", "#...#", ".###."],
+    '1': [".##..", "###..", ".##..", ".##..", ".##..", ".##..", "####."],
+    '2': [".###.", "#...#", "....#", "..##.", ".#...", "#....", "#####"],
+    '3': [".###.", "#...#", "....#", "..##.", "....#", "#...#", ".###."],
+    '4': ["...#.", "..##.", ".#.#.", "#..#.", "#####", "...#.", "...#."],
+    '5': ["#####", "#....", "####.", "....#", "....#", "#...#", ".###."],
+    '6': [".###.", "#...#", "#....", "####.", "#...#", "#...#", ".###."],
+    '7': ["#####", "....#", "...#.", "..#..", ".#...", ".#...", ".#..."],
+    '8': [".###.", "#...#", "#...#", ".###.", "#...#", "#...#", ".###."],
+    '9': [".###.", "#...#", "#...#", ".####", "....#", "#...#", ".###."],
+    ':': ["....", "..#.", "..#.", "....", "..#.", "..#.", "...."],
+}
+
+# Codepoint ranges for the digit providers. Balance uses one ascent,
+# time uses a lower ascent so they stack vertically on the plate.
+DIGIT_BASE_BALANCE = 0xE200  # 0..9 at 0xE200..0xE209, ':' at 0xE20A
+DIGIT_BASE_TIME    = 0xE220  # 0..9 at 0xE220..0xE229, ':' at 0xE22A
+DIGIT_BALANCE_ASCENT = 102
+DIGIT_TIME_ASCENT    = 92
+DIGIT_CANVAS_H       = 102  # must be >= max(ascent) for ascent<=height rule
+
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
 BAR_BASES = {
@@ -200,6 +227,24 @@ def slice_bar(src: Path, out_dir: Path, name: str,
         frame.save(out_dir / f"{name}_{i:02d}.png")
 
 
+def render_digits(out_dir: Path) -> None:
+    """Draw each digit pattern into a tall padded canvas so the plate's
+    ascent range can reach it. Content sits at the top of a DIGIT_CANVAS_H
+    canvas with a sentinel pixel at top-right to pin advance."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for ch, rows in DIGIT_PATTERNS.items():
+        w = max(len(r) for r in rows)
+        img = Image.new("RGBA", (w, DIGIT_CANVAS_H), (0, 0, 0, 0))
+        for y, row in enumerate(rows):
+            for x, c in enumerate(row):
+                if c == "#":
+                    img.putpixel((x, y), (255, 255, 255, 255))
+        img.putpixel((w - 1, 0), (255, 255, 255, 1))
+        # Save under a filename-safe name — ':' can't be in filenames.
+        safe = "colon" if ch == ":" else ch
+        img.save(out_dir / f"{safe}.png")
+
+
 def emit_font(width_map: dict[int, int]) -> None:
     """Write default.json wiring every codepoint to its texture/advance.
 
@@ -246,6 +291,26 @@ def emit_font(width_map: dict[int, int]) -> None:
     for i, offset in enumerate(SPACE_OFFSETS):
         advances[chr_(SPACE_BASE + i)] = offset
     providers.append({"type": "space", "advances": advances})
+
+    # Digit glyphs for on-plate readouts (balance + time). Same textures,
+    # different ascents for the two rows so the values stack vertically.
+    for base_cp, ascent in [(DIGIT_BASE_BALANCE, DIGIT_BALANCE_ASCENT),
+                             (DIGIT_BASE_TIME, DIGIT_TIME_ASCENT)]:
+        for i, ch in enumerate("0123456789"):
+            providers.append({
+                "type": "bitmap",
+                "file": f"foxmobmashers:hud/digits/{ch}.png",
+                "ascent": ascent,
+                "height": DIGIT_CANVAS_H,
+                "chars": [chr_(base_cp + i)],
+            })
+        providers.append({
+            "type": "bitmap",
+            "file": "foxmobmashers:hud/digits/colon.png",
+            "ascent": ascent,
+            "height": DIGIT_CANVAS_H,
+            "chars": [chr_(base_cp + 10)],
+        })
 
     FONT_OUT.parent.mkdir(parents=True, exist_ok=True)
     FONT_OUT.write_text(json.dumps({"providers": providers}, indent=2) + "\n")
@@ -312,6 +377,9 @@ def main() -> None:
     for bar, (fname, _, _) in BAR_SOURCES.items():
         slice_bar(src / fname, TEXTURES_OUT / bar, bar,
                   pad_to_height=BAR_PAD_HEIGHT.get(bar, 0))
+
+    # Custom digit glyphs for on-plate balance/time readouts.
+    render_digits(TEXTURES_OUT / "digits")
 
     # Synthesize middle connector by tiling a vertical plate-body slice
     # from under_left.png across the hotbar gap. Sampling column 120 of
