@@ -32,9 +32,12 @@ directory with these subpaths:
 
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import shutil
 import sys
+import urllib.request
 from pathlib import Path
 
 from PIL import Image
@@ -130,7 +133,28 @@ SMALL_DIGIT_ADVANCE = 4  # texture width 3 + 1 default spacing
 DIGIT_BASE_BALANCE = 0xE200  # 0..9 at 0xE200..0xE209, ':' at 0xE20A
 DIGIT_BASE_TIME    = 0xE220  # 0..9 at 0xE220..0xE229, ':' at 0xE22A
 DIGIT_BASE_LEVEL   = 0xE240  # 0..9 at 0xE240..0xE249, ':' at 0xE24A
-SKULL_CODEPOINT    = 0xE300  # Placeholder skull icon for the character slot
+SKULL_CODEPOINT    = 0xE3FF  # Fallback skull icon (no per-character head)
+
+# Per-character head codepoints. KEEP IN SYNC with HudGlyphs.java
+# CHARACTER_HEAD_CODEPOINTS in the plugin — the plugin looks the
+# codepoint up by character id to pick which glyph to render.
+CHARACTER_HEAD_CODEPOINTS = {
+    "antonio":   0xE300,
+    "imelda":    0xE301,
+    "pasqualina":0xE302,
+    "gennaro":   0xE303,
+    "arca":      0xE304,
+    "porta":     0xE305,
+    "lama":      0xE306,
+    "poe":       0xE307,
+    "clerici":   0xE308,
+    "dommario":  0xE309,
+    "krochi":    0xE30A,
+    "christine": 0xE30B,
+    "pugnala":   0xE30C,
+    "giovanna":  0xE30D,
+    "mortaccio": 0xE30E,
+}
 DIGIT_BALANCE_ASCENT = 215
 DIGIT_TIME_ASCENT    = 205
 # Level sits in the medallion diamond at the top-center of the bottom
@@ -258,6 +282,75 @@ def slice_bar(src: Path, out_dir: Path, name: str,
         frame.save(out_dir / f"{name}_{i:02d}.png")
 
 
+def extract_head_from_skin(skin_png: Image.Image) -> Image.Image:
+    """Return an 8x8 RGBA head: the face layer (pixels 8..16, 8..16) with
+    the hat overlay (pixels 40..48, 8..16) composited on top so helmet
+    features (hair, helmets, etc.) show."""
+    face = skin_png.crop((8, 8, 16, 16)).convert("RGBA")
+    hat = skin_png.crop((40, 8, 48, 16)).convert("RGBA")
+    out = Image.new("RGBA", (8, 8), (0, 0, 0, 0))
+    out.paste(face, (0, 0))
+    out.alpha_composite(hat)
+    return out
+
+
+def build_character_heads(out_dir: Path) -> set[str]:
+    """Parse tools/character_skins.yaml, download each skin PNG, extract
+    the 8x8 head, and save it as ``heads/<character_id>.png``. Cached in
+    tools/skin_cache/<hash>.png so repeat builds don't re-download.
+
+    Returns the set of character ids for which a head was produced."""
+    try:
+        import yaml  # type: ignore
+    except ImportError:
+        print("character_heads: PyYAML not installed, skipping character head generation", file=sys.stderr)
+        return set()
+
+    tools_dir = Path(__file__).resolve().parent
+    skins_path = tools_dir / "character_skins.yaml"
+    if not skins_path.is_file():
+        return set()
+    with open(skins_path) as f:
+        skins = yaml.safe_load(f) or {}
+
+    cache_dir = tools_dir / "skin_cache"
+    cache_dir.mkdir(exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    produced: set[str] = set()
+    for char_id, entry in skins.items():
+        if not isinstance(entry, dict) or "value" not in entry:
+            continue
+        if char_id not in CHARACTER_HEAD_CODEPOINTS:
+            print(f"character_heads: unknown character id '{char_id}' — add to CHARACTER_HEAD_CODEPOINTS")
+            continue
+        try:
+            decoded = base64.b64decode(entry["value"]).decode()
+            payload = json.loads(decoded)
+            url = payload["textures"]["SKIN"]["url"]
+        except Exception as e:
+            print(f"character_heads: {char_id} — failed to decode skin value: {e}")
+            continue
+
+        cache_key = hashlib.sha1(url.encode()).hexdigest()
+        cached = cache_dir / f"{cache_key}.png"
+        if not cached.is_file():
+            # textures.minecraft.net redirects http → https cleanly but some
+            # CDNs reject plain http requests without a user-agent, so we
+            # force-upgrade and set one.
+            https_url = url.replace("http://", "https://", 1)
+            req = urllib.request.Request(https_url, headers={"User-Agent": "foxmobmashers-pack-build"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                cached.write_bytes(r.read())
+
+        skin_img = Image.open(cached).convert("RGBA")
+        head = extract_head_from_skin(skin_img)
+        head.save(out_dir / f"{char_id}.png")
+        produced.add(char_id)
+        print(f"character_heads: {char_id} -> {out_dir / (char_id + '.png')}")
+    return produced
+
+
 def render_placeholder_skull(out_path: Path) -> None:
     """8x8 pixel-art skull on a transparent background. Overridable — if
     tools/overrides/skull.png exists it wins (set in main())."""
@@ -315,7 +408,7 @@ def render_digits(out_dir: Path, patterns, canvas_h: int,
         img.save(out_dir / f"{safe}.png")
 
 
-def emit_font(width_map: dict[int, int]) -> None:
+def emit_font(width_map: dict[int, int], character_head_ids: set[str]) -> None:
     """Write default.json wiring every codepoint to its texture/advance.
 
     width_map[codepoint] = source PNG width in pixels — needed so we can set
@@ -362,9 +455,8 @@ def emit_font(width_map: dict[int, int]) -> None:
         advances[chr_(SPACE_BASE + i)] = offset
     providers.append({"type": "space", "advances": advances})
 
-    # Placeholder skull glyph — character slot on the top-left plate.
-    # Texture is 8x8; a tall canvas-friendly ascent is NOT needed because
-    # a small 8-pixel skull is fine at its native render size.
+    # Placeholder skull glyph — fallback when no per-character head is
+    # shipped for the player's selected character.
     providers.append({
         "type": "bitmap",
         "file": "foxmobmashers:hud/skull.png",
@@ -372,6 +464,18 @@ def emit_font(width_map: dict[int, int]) -> None:
         "height": 8,
         "chars": [chr_(SKULL_CODEPOINT)],
     })
+
+    # Per-character head glyphs. Only emitted for characters whose skins
+    # were decoded in build_character_heads — unknown ids fall back to
+    # the placeholder skull via the plugin's character → codepoint map.
+    for char_id in sorted(character_head_ids):
+        providers.append({
+            "type": "bitmap",
+            "file": f"foxmobmashers:hud/heads/{char_id}.png",
+            "ascent": 8,
+            "height": 8,
+            "chars": [chr_(CHARACTER_HEAD_CODEPOINTS[char_id])],
+        })
 
     # Digit glyphs for on-plate readouts. Balance + time use 5x7 digits
     # from digits/, level uses the compact 3x5 digits from digits_small/.
@@ -495,6 +599,10 @@ def main() -> None:
         shutil.copy(skull_override, TEXTURES_OUT / "skull.png")
         print(f"override: {skull_override} -> {TEXTURES_OUT / 'skull.png'}")
 
+    # Per-character head glyphs from tools/character_skins.yaml. Skipped
+    # silently if PyYAML isn't installed or the yaml file is empty.
+    produced_heads = build_character_heads(TEXTURES_OUT / "heads")
+
     # Synthesize middle connector by tiling a 1-pixel-wide plate-body
     # column from under_left.png across the hotbar gap. Column 95 is pure
     # body (between labels and the right-edge V-notch), so tiling it gives
@@ -510,7 +618,7 @@ def main() -> None:
 
     # Font JSON — width_map currently unused but kept threaded so it's easy
     # to introduce per-glyph aspect tweaks later without rewriting the call.
-    emit_font(width_map={})
+    emit_font(width_map={}, character_head_ids=produced_heads)
 
     print(f"wrote {TEXTURES_OUT}")
     print(f"wrote {FONT_OUT}")

@@ -1,0 +1,11 @@
+# Signed texture-property pairs for each character's skin. Values match the
+# character.skins section of the server's FoxMobMashers config.yml — only
+# `value` is required here (we use it to derive the skin URL); `signature`
+# is kept for reference so this file can be copy-pasted between configs.
+#
+# Add entries as skins are provided. Characters with no entry fall back to
+# the generic placeholder skull glyph in the HUD.
+
+antonio:
+  value: "ewogICJ0aW1lc3RhbXAiIDogMTc3MjcyNzM4ODAzNSwKICAicHJvZmlsZUlkIiA6ICIyYThjZTE5ZWY3Mjg0NTBjYjY2YmEyNzNhNzVmNjI1MSIsCiAgInByb2ZpbGVOYW1lIiA6ICJYRDROVDNfNjY2IiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzZiN2JlOWI4OTQyMzgxMjFiNzkxOTBhY2FhYTU4NDgzMTU4NDA4NTdlMjg4Y2YyMDc0ZmRkOTlmNGI0MzNhY2YiLAogICAgICAibWV0YWRhdGEiIDogewogICAgICAgICJtb2RlbCIgOiAic2xpbSIKICAgICAgfQogICAgfQogIH0KfQ=="
+  signature: "KkWqbvJGSVZqnCvbndDGID6F45/NjTzU9DLCxXsBUKJ7UoCiI2"
