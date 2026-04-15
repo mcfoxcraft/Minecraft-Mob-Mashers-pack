@@ -115,7 +115,10 @@ DIGIT_BASE_TIME    = 0xE220  # 0..9 at 0xE220..0xE229, ':' at 0xE22A
 DIGIT_BASE_LEVEL   = 0xE240  # 0..9 at 0xE240..0xE249, ':' at 0xE24A
 DIGIT_BALANCE_ASCENT = 215
 DIGIT_TIME_ASCENT    = 205
-DIGIT_LEVEL_ASCENT   = 195
+# Level sits in the medallion diamond at the top-center of the bottom
+# HUD (above the hotbar), so its ascent is much lower — just above
+# the action-bar baseline where the medallion art lands.
+DIGIT_LEVEL_ASCENT   = 18
 DIGIT_CANVAS_H       = 220  # must be >= max(ascent) for ascent<=height rule
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
