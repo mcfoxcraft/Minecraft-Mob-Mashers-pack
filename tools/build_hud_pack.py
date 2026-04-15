@@ -138,7 +138,7 @@ DIGIT_TIME_ASCENT    = 205
 # canvas (SMALL_DIGIT_CANVAS_H), then use an ascent that offsets the
 # whole glyph so the visible content lands where the diamond sits
 # (roughly -10 below the action-bar baseline).
-DIGIT_LEVEL_ASCENT   = 15
+DIGIT_LEVEL_ASCENT   = 10
 DIGIT_CANVAS_H       = 220  # balance + time canvas
 SMALL_DIGIT_CANVAS_H = 30   # level canvas (smaller, content at bottom)
 
