@@ -155,8 +155,8 @@ CHARACTER_HEAD_CODEPOINTS = {
     "giovanna":  0xE30D,
     "mortaccio": 0xE30E,
 }
-DIGIT_BALANCE_ASCENT = 211
-DIGIT_TIME_ASCENT    = 201
+DIGIT_BALANCE_ASCENT = 209
+DIGIT_TIME_ASCENT    = 186
 # Level sits in the medallion diamond at the top-center of the bottom
 # HUD. Ascent alone can't go below 0, so to push level DOWN below
 # baseline we render its digit content at the bottom of a shorter
@@ -186,7 +186,7 @@ BAR_SOURCES = {
     # so it lands on the plate's HEART label. Exp bar does the same but
     # with an even lower ascent, dropping it onto the vanilla XP bar
     # strip below the hotbar.
-    "health":  ("health_bar.png",  10, 40),
+    "health":  ("health_bar.png",   9, 40),
     "armor":   ("armor_bar.png",   15, 20),
     "exp":     ("exp_bar.png",      2, 40),
 }
