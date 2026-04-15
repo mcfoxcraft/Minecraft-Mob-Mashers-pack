@@ -387,7 +387,7 @@ def main() -> None:
     # a smooth banner with no repeating decorative artifacts.
     ul_src = Image.open(src / "under" / "left" / "under_left1.png").convert("RGBA")
     strip = ul_src.crop((95, 0, 96, ul_src.height))  # 1px wide
-    connector_w = 112
+    connector_w = 192
     connector = Image.new("RGBA", (connector_w, ul_src.height), (0, 0, 0, 0))
     for x in range(connector_w):
         connector.paste(strip, (x, 0), strip)
