@@ -133,10 +133,14 @@ DIGIT_BASE_LEVEL   = 0xE240  # 0..9 at 0xE240..0xE249, ':' at 0xE24A
 DIGIT_BALANCE_ASCENT = 215
 DIGIT_TIME_ASCENT    = 205
 # Level sits in the medallion diamond at the top-center of the bottom
-# HUD (above the hotbar), so its ascent is much lower — just above
-# the action-bar baseline where the medallion art lands.
-DIGIT_LEVEL_ASCENT   = 0
-DIGIT_CANVAS_H       = 220  # must be >= max(ascent) for ascent<=height rule
+# HUD. Ascent alone can't go below 0, so to push level DOWN below
+# baseline we render its digit content at the bottom of a shorter
+# canvas (SMALL_DIGIT_CANVAS_H), then use an ascent that offsets the
+# whole glyph so the visible content lands where the diamond sits
+# (roughly -10 below the action-bar baseline).
+DIGIT_LEVEL_ASCENT   = 15
+DIGIT_CANVAS_H       = 220  # balance + time canvas
+SMALL_DIGIT_CANVAS_H = 30   # level canvas (smaller, content at bottom)
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
@@ -267,20 +271,23 @@ def mask_regions(png_path: Path, regions, fill=(0, 0, 0, 0)) -> None:
     im.save(png_path)
 
 
-def render_digits(out_dir: Path, patterns, canvas_h: int) -> None:
-    """Draw each digit pattern into a tall padded canvas so the plate's
-    ascent range can reach it. Content sits at the top of a canvas_h-
-    tall canvas with a sentinel pixel at top-right to pin advance."""
+def render_digits(out_dir: Path, patterns, canvas_h: int,
+                  content_at_bottom: bool = False) -> None:
+    """Draw each digit pattern into a canvas_h-tall canvas. content_at_bottom
+    shifts the pixel art down to the last rows so a low ascent places the
+    visible content below baseline.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
     for ch, rows in patterns.items():
         w = max(len(r) for r in rows)
         img = Image.new("RGBA", (w, canvas_h), (0, 0, 0, 0))
+        pattern_h = len(rows)
+        y_offset = canvas_h - pattern_h if content_at_bottom else 0
         for y, row in enumerate(rows):
             for x, c in enumerate(row):
                 if c == "#":
-                    img.putpixel((x, y), (255, 255, 255, 255))
+                    img.putpixel((x, y + y_offset), (255, 255, 255, 255))
         img.putpixel((w - 1, 0), (255, 255, 255, 1))
-        # Save under a filename-safe name — ':' can't be in filenames.
         safe = "colon" if ch == ":" else ch
         img.save(out_dir / f"{safe}.png")
 
@@ -334,24 +341,24 @@ def emit_font(width_map: dict[int, int]) -> None:
 
     # Digit glyphs for on-plate readouts. Balance + time use 5x7 digits
     # from digits/, level uses the compact 3x5 digits from digits_small/.
-    for base_cp, ascent, dir_ in [
-        (DIGIT_BASE_BALANCE, DIGIT_BALANCE_ASCENT, "digits"),
-        (DIGIT_BASE_TIME,    DIGIT_TIME_ASCENT,    "digits"),
-        (DIGIT_BASE_LEVEL,   DIGIT_LEVEL_ASCENT,   "digits_small"),
+    for base_cp, ascent, dir_, h in [
+        (DIGIT_BASE_BALANCE, DIGIT_BALANCE_ASCENT, "digits",       DIGIT_CANVAS_H),
+        (DIGIT_BASE_TIME,    DIGIT_TIME_ASCENT,    "digits",       DIGIT_CANVAS_H),
+        (DIGIT_BASE_LEVEL,   DIGIT_LEVEL_ASCENT,   "digits_small", SMALL_DIGIT_CANVAS_H),
     ]:
         for i, ch in enumerate("0123456789"):
             providers.append({
                 "type": "bitmap",
                 "file": f"foxmobmashers:hud/{dir_}/{ch}.png",
                 "ascent": ascent,
-                "height": DIGIT_CANVAS_H,
+                "height": h,
                 "chars": [chr_(base_cp + i)],
             })
         providers.append({
             "type": "bitmap",
             "file": f"foxmobmashers:hud/{dir_}/colon.png",
             "ascent": ascent,
-            "height": DIGIT_CANVAS_H,
+            "height": h,
             "chars": [chr_(base_cp + 10)],
         })
 
@@ -438,10 +445,12 @@ def main() -> None:
             shutil.copy(candidate, TEXTURES_OUT / name)
             print(f"override: {candidate} -> {TEXTURES_OUT / name}")
 
-    # Custom digit glyphs. Balance + time use the larger 5x7 pixel set;
-    # level uses the compact 3x5 pixel set for the medallion readout.
-    render_digits(TEXTURES_OUT / "digits",       DIGIT_PATTERNS,       DIGIT_CANVAS_H)
-    render_digits(TEXTURES_OUT / "digits_small", SMALL_DIGIT_PATTERNS, DIGIT_CANVAS_H)
+    # Custom digit glyphs. Balance + time: large 5x7 at canvas-top so
+    # high ascent lifts them up. Level: compact 3x5 at canvas-BOTTOM so
+    # low ascent drops them below baseline into the medallion.
+    render_digits(TEXTURES_OUT / "digits", DIGIT_PATTERNS, DIGIT_CANVAS_H)
+    render_digits(TEXTURES_OUT / "digits_small", SMALL_DIGIT_PATTERNS,
+                  SMALL_DIGIT_CANVAS_H, content_at_bottom=True)
 
     # Synthesize middle connector by tiling a 1-pixel-wide plate-body
     # column from under_left.png across the hotbar gap. Column 95 is pure
