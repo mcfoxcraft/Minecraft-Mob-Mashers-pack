@@ -169,9 +169,9 @@ CHARACTER_HEAD_CODEPOINTS = {
 # these offsets keep the elements' relative positions locked.
 # Decreased by 10 vs the original action-bar layout so the dynamic
 # content rides up inside the plate instead of sitting at its bottom.
-BALANCE_ASCENT_OFFSET = -20  # balance digits 20 px ABOVE plate top
-TIME_ASCENT_OFFSET    =  -6  # time digits 6 px ABOVE plate top
-HEAD_ASCENT_OFFSET    = -20  # head 20 px ABOVE plate top
+BALANCE_ASCENT_OFFSET = -24  # balance digits 24 px ABOVE plate top
+TIME_ASCENT_OFFSET    = -10  # time digits 10 px ABOVE plate top
+HEAD_ASCENT_OFFSET    = -16  # head 16 px ABOVE plate top
 DIGIT_BALANCE_ASCENT  = TOP_LEFT_NATURAL_H - BALANCE_ASCENT_OFFSET
 DIGIT_TIME_ASCENT     = TOP_LEFT_NATURAL_H - TIME_ASCENT_OFFSET
 # Level sits in the medallion diamond at the top-center of the bottom
