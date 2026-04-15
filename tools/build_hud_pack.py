@@ -73,11 +73,10 @@ PLATES = [
     (0xE003, "top_right_north.png",  120, 120),
     (0xE004, "top_right_south.png",  120, 120),
     (0xE005, "top_right_west.png",   120, 120),
-    # Under plates stay at hotbar level. ascent=30, height=86 puts top of
-    # glyph 30px above baseline, bottom 56px below baseline — sits across
-    # the hotbar + extension area.
-    (0xE006, "under_left.png",        30, 86),
-    (0xE007, "under_right.png",       30, 86),
+    # Under plates sit at hotbar level. ascent=15 drops them closer to the
+    # hotbar items (raising ascent would float them above the hotbar).
+    (0xE006, "under_left.png",        15, 86),
+    (0xE007, "under_right.png",       15, 86),
     (0xE008, "graveyard_head.png",    16, 16),
 ]
 
@@ -95,11 +94,11 @@ BAR_BASES = {
 }
 BAR_SOURCES = {
     # (file, ascent, height). ascent must be ≤ height or MC aborts font
-    # load. For the armor bar to sit higher than the health bar, we pad
-    # its slice heights (see slice_bar) so its content occupies just the
-    # top 7 rows of a taller canvas.
-    "health":  ("health_bar.png",   7,  7),
-    "armor":   ("armor_bar.png",   20, 20),
+    # load. Bars inherit the under-plate's downward shift (-15 vs the
+    # old layout) by reducing their ascents in lockstep — health 7→3,
+    # armor 20→10 — so the labels on the plate still frame the bars.
+    "health":  ("health_bar.png",   3,  7),
+    "armor":   ("armor_bar.png",   10, 20),
     "exp":     ("exp_bar.png",      3,  3),
 }
 # Bars with height > their source bar-strip height need vertical padding
