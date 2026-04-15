@@ -62,15 +62,20 @@ BAR_STEPS = 25
 # to the screen center.
 PLATES = [
     # (codepoint, output_png, ascent, height)
-    (0xE000, "top_left.png",         -90, 44),
-    (0xE001, "top_right_base.png",   -90, 44),
-    (0xE002, "top_right_east.png",   -90, 44),
-    (0xE003, "top_right_north.png",  -90, 44),
-    (0xE004, "top_right_south.png",  -90, 44),
-    (0xE005, "top_right_west.png",   -90, 44),
-    (0xE006, "under_left.png",        60, 86),
-    (0xE007, "under_right.png",       60, 86),
-    (0xE008, "graveyard_head.png",   -90, 16),
+    # Minecraft enforces 0 <= ascent <= height, where ascent = pixels the
+    # glyph extends above the text baseline. ascent == height puts the
+    # glyph fully above baseline (sitting on top of the action-bar text);
+    # smaller values drop it partway into/below the text line. Our plates
+    # all use ascent == height so they stack above the readable text.
+    (0xE000, "top_left.png",          44, 44),
+    (0xE001, "top_right_base.png",    44, 44),
+    (0xE002, "top_right_east.png",    44, 44),
+    (0xE003, "top_right_north.png",   44, 44),
+    (0xE004, "top_right_south.png",   44, 44),
+    (0xE005, "top_right_west.png",    44, 44),
+    (0xE006, "under_left.png",        86, 86),
+    (0xE007, "under_right.png",       86, 86),
+    (0xE008, "graveyard_head.png",    16, 16),
 ]
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
@@ -81,11 +86,9 @@ BAR_BASES = {
     "exp":     0xE060,
 }
 BAR_SOURCES = {
-    "health":  ("health_bar.png", -78,  7),  # ascent below baseline so they sit at chest-bar level
-    "armor":   ("armor_bar.png",  -85,  7),
-    # Minecraft enforces ascent <= height on bitmap glyphs, so anything taller
-    # than the exp bar's 3px height would fail font load. Keep it at the limit.
-    "exp":     ("exp_bar.png",      3,  3),  # under the action-bar text — exp belt
+    "health":  ("health_bar.png",   7,  7),  # ascent == height: fully above baseline
+    "armor":   ("armor_bar.png",    7,  7),
+    "exp":     ("exp_bar.png",      3,  3),
 }
 
 # Horizontal positioning glyphs (space provider). Negative = backtrack,
