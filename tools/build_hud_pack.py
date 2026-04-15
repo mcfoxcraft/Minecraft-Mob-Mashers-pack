@@ -167,6 +167,12 @@ DIGIT_LEVEL_ASCENT   = 6
 DIGIT_CANVAS_H       = 220  # balance + time canvas
 SMALL_DIGIT_CANVAS_H = 30   # level canvas (smaller, content at bottom)
 
+# Character head canvas. 16x16 head content pasted at the top of a tall
+# canvas so ascent=HEAD_ASCENT lifts it up onto the top-left plate.
+HEAD_CONTENT_PX = 16
+HEAD_CANVAS_H   = 220
+HEAD_ASCENT     = 216
+
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
 BAR_BASES = {
@@ -283,15 +289,21 @@ def slice_bar(src: Path, out_dir: Path, name: str,
 
 
 def extract_head_from_skin(skin_png: Image.Image) -> Image.Image:
-    """Return an 8x8 RGBA head: the face layer (pixels 8..16, 8..16) with
-    the hat overlay (pixels 40..48, 8..16) composited on top so helmet
-    features (hair, helmets, etc.) show."""
+    """Composite the 8x8 face + hat overlay, upscale to HEAD_CONTENT_PX
+    with nearest-neighbor, and paste at the top of a HEAD_CONTENT_PX-wide
+    × HEAD_CANVAS_H-tall canvas so a high ascent lifts it onto the plate."""
     face = skin_png.crop((8, 8, 16, 16)).convert("RGBA")
     hat = skin_png.crop((40, 8, 48, 16)).convert("RGBA")
-    out = Image.new("RGBA", (8, 8), (0, 0, 0, 0))
-    out.paste(face, (0, 0))
-    out.alpha_composite(hat)
-    return out
+    head8 = Image.new("RGBA", (8, 8), (0, 0, 0, 0))
+    head8.paste(face, (0, 0))
+    head8.alpha_composite(hat)
+    head = head8.resize((HEAD_CONTENT_PX, HEAD_CONTENT_PX), Image.NEAREST)
+    canvas = Image.new("RGBA", (HEAD_CONTENT_PX, HEAD_CANVAS_H), (0, 0, 0, 0))
+    canvas.paste(head, (0, 0))
+    # Sentinel pixel at top-right of canvas so MC doesn't auto-crop the
+    # glyph's advance down when the rest of the canvas is transparent.
+    canvas.putpixel((HEAD_CONTENT_PX - 1, 0), (255, 255, 255, 1))
+    return canvas
 
 
 def build_character_heads(out_dir: Path) -> set[str]:
@@ -352,25 +364,30 @@ def build_character_heads(out_dir: Path) -> set[str]:
 
 
 def render_placeholder_skull(out_path: Path) -> None:
-    """8x8 pixel-art skull on a transparent background. Overridable — if
-    tools/overrides/skull.png exists it wins (set in main())."""
+    """Pixel-art skull pasted at the top of a HEAD_CONTENT_PX wide ×
+    HEAD_CANVAS_H tall canvas — same geometry as character heads so both
+    render at the same size + position via the same ascent."""
     pattern = [
         ".######.",
         "########",
-        "#.##.##.",  # eye sockets
+        "#.##.##.",
         "########",
-        "#.####.#",  # nose/mouth
+        "#.####.#",
         "########",
-        "##.##.##",  # teeth
+        "##.##.##",
         ".######.",
     ]
-    img = Image.new("RGBA", (8, 8), (0, 0, 0, 0))
+    head8 = Image.new("RGBA", (8, 8), (0, 0, 0, 0))
     for y, row in enumerate(pattern):
         for x, c in enumerate(row):
             if c == "#":
-                img.putpixel((x, y), (220, 220, 210, 255))
+                head8.putpixel((x, y), (220, 220, 210, 255))
+    head = head8.resize((HEAD_CONTENT_PX, HEAD_CONTENT_PX), Image.NEAREST)
+    canvas = Image.new("RGBA", (HEAD_CONTENT_PX, HEAD_CANVAS_H), (0, 0, 0, 0))
+    canvas.paste(head, (0, 0))
+    canvas.putpixel((HEAD_CONTENT_PX - 1, 0), (255, 255, 255, 1))
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    img.save(out_path)
+    canvas.save(out_path)
 
 
 def mask_regions(png_path: Path, regions, fill=(0, 0, 0, 0)) -> None:
@@ -456,14 +473,13 @@ def emit_font(width_map: dict[int, int], character_head_ids: set[str]) -> None:
     providers.append({"type": "space", "advances": advances})
 
     # Placeholder skull glyph — fallback when no per-character head is
-    # shipped for the player's selected character. 8x8 source texture
-    # rendered at height=16 so it displays at 2x (matches vanilla
-    # inventory-scale player heads).
+    # shipped for the player's selected character. 16x16 content at the
+    # top of a tall padded canvas, same geometry as character heads.
     providers.append({
         "type": "bitmap",
         "file": "foxmobmashers:hud/skull.png",
-        "ascent": 16,
-        "height": 16,
+        "ascent": HEAD_ASCENT,
+        "height": HEAD_CANVAS_H,
         "chars": [chr_(SKULL_CODEPOINT)],
     })
 
@@ -474,8 +490,8 @@ def emit_font(width_map: dict[int, int], character_head_ids: set[str]) -> None:
         providers.append({
             "type": "bitmap",
             "file": f"foxmobmashers:hud/heads/{char_id}.png",
-            "ascent": 16,
-            "height": 16,
+            "ascent": HEAD_ASCENT,
+            "height": HEAD_CANVAS_H,
             "chars": [chr_(CHARACTER_HEAD_CODEPOINTS[char_id])],
         })
 
