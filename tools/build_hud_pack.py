@@ -94,13 +94,19 @@ BAR_BASES = {
     "exp":     0xE060,
 }
 BAR_SOURCES = {
-    # (file, ascent, height)
-    # Armor bar sits at ascent=16 (above the HEART row), health bar at
-    # ascent=7 (aligned with the under-plate's HEART label). Exp bar
-    # stays low at the hotbar's top edge.
+    # (file, ascent, height). ascent must be ≤ height or MC aborts font
+    # load. For the armor bar to sit higher than the health bar, we pad
+    # its slice heights (see slice_bar) so its content occupies just the
+    # top 7 rows of a taller canvas.
     "health":  ("health_bar.png",   7,  7),
-    "armor":   ("armor_bar.png",   20,  7),
+    "armor":   ("armor_bar.png",   20, 20),
     "exp":     ("exp_bar.png",      3,  3),
+}
+# Bars with height > their source bar-strip height need vertical padding
+# on every slice so the canvas is tall enough for MC's ascent ≤ height
+# constraint. armor_pad_rows = BAR_SOURCES['armor'][2] - source_height.
+BAR_PAD_HEIGHT = {
+    "armor": 20,
 }
 
 # Horizontal positioning glyphs (space provider). Negative = backtrack,
@@ -159,7 +165,8 @@ def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path,
     padded.save(out_path)
 
 
-def slice_bar(src: Path, out_dir: Path, name: str) -> None:
+def slice_bar(src: Path, out_dir: Path, name: str,
+              pad_to_height: int = 0) -> None:
     """Write BAR_STEPS PNGs each revealing (i+1)/BAR_STEPS of the source bar.
 
     Every output is the FULL source size with a right-side transparency
@@ -170,17 +177,23 @@ def slice_bar(src: Path, out_dir: Path, name: str) -> None:
     ones — shifting the whole action bar every time the value changed.
     The sentinel is practically invisible (alpha 1/255) but keeps the
     glyph's advance pinned to the source's full pixel width.
+
+    ``pad_to_height``: if > source h, each slice is placed at the TOP of
+    a canvas that tall and the rest left transparent. Used so we can set
+    ascent > source_h (e.g. to lift the armor bar above the HEART row)
+    while still satisfying MC's ascent ≤ height constraint.
     """
     if not src.is_file():
         die(f"missing bar source {src}")
     base = Image.open(src).convert("RGBA")
-    w, h = base.size
+    w, src_h = base.size
+    canvas_h = max(src_h, pad_to_height)
     out_dir.mkdir(parents=True, exist_ok=True)
     for i in range(BAR_STEPS):
         fill_px = round((i + 1) * w / BAR_STEPS)
-        frame = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        frame = Image.new("RGBA", (w, canvas_h), (0, 0, 0, 0))
         if fill_px > 0:
-            frame.paste(base.crop((0, 0, fill_px, h)), (0, 0))
+            frame.paste(base.crop((0, 0, fill_px, src_h)), (0, 0))
         frame.putpixel((w - 1, 0), (0, 0, 0, 1))
         frame.save(out_dir / f"{name}_{i:02d}.png")
 
@@ -295,7 +308,8 @@ def main() -> None:
 
     # Bar slices
     for bar, (fname, _, _) in BAR_SOURCES.items():
-        slice_bar(src / fname, TEXTURES_OUT / bar, bar)
+        slice_bar(src / fname, TEXTURES_OUT / bar, bar,
+                  pad_to_height=BAR_PAD_HEIGHT.get(bar, 0))
 
     # Font JSON — width_map currently unused but kept threaded so it's easy
     # to introduce per-glyph aspect tweaks later without rewriting the call.
