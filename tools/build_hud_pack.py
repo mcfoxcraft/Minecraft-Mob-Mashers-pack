@@ -73,8 +73,10 @@ PLATES = [
     (0xE003, "top_right_north.png",   44, 44),
     (0xE004, "top_right_south.png",   44, 44),
     (0xE005, "top_right_west.png",    44, 44),
-    (0xE006, "under_left.png",        86, 86),
-    (0xE007, "under_right.png",       86, 86),
+    # Under plates drop to ascent=30 so they sit mostly below the baseline
+    # at hotbar level instead of floating above the action-bar text line.
+    (0xE006, "under_left.png",        30, 86),
+    (0xE007, "under_right.png",       30, 86),
     (0xE008, "graveyard_head.png",    16, 16),
 ]
 
@@ -127,9 +129,14 @@ def stitch_animated(src_dir: Path, frame_prefix: str, out_path: Path) -> None:
 def slice_bar(src: Path, out_dir: Path, name: str) -> None:
     """Write BAR_STEPS PNGs each revealing (i+1)/BAR_STEPS of the source bar.
 
-    Each output is the FULL source size with the right portion masked
-    transparent — keeps the glyph advance constant so the bar doesn't shift
-    around the screen as it fills.
+    Every output is the FULL source size with a right-side transparency
+    mask for the unfilled portion. Crucially we place a single alpha=1
+    sentinel pixel at each slice's top-right corner: Minecraft auto-crops
+    trailing fully-transparent columns from a bitmap glyph's advance,
+    which would otherwise make lower-fill slices narrower than higher-fill
+    ones — shifting the whole action bar every time the value changed.
+    The sentinel is practically invisible (alpha 1/255) but keeps the
+    glyph's advance pinned to the source's full pixel width.
     """
     if not src.is_file():
         die(f"missing bar source {src}")
@@ -137,11 +144,11 @@ def slice_bar(src: Path, out_dir: Path, name: str) -> None:
     w, h = base.size
     out_dir.mkdir(parents=True, exist_ok=True)
     for i in range(BAR_STEPS):
-        # Reveal pixels [0, fill_px). i=0 gives an empty bar, i=BAR_STEPS-1 full.
         fill_px = round((i + 1) * w / BAR_STEPS)
         frame = Image.new("RGBA", (w, h), (0, 0, 0, 0))
         if fill_px > 0:
             frame.paste(base.crop((0, 0, fill_px, h)), (0, 0))
+        frame.putpixel((w - 1, 0), (0, 0, 0, 1))
         frame.save(out_dir / f"{name}_{i:02d}.png")
 
 
@@ -225,8 +232,13 @@ def main() -> None:
     if head_src.is_file():
         shutil.copy(head_src, TEXTURES_OUT / "graveyard_head.png")
     else:
-        # 16x16 transparent placeholder so the font reference doesn't 404.
-        Image.new("RGBA", (16, 16), (0, 0, 0, 0)).save(TEXTURES_OUT / "graveyard_head.png")
+        # 16x16 transparent placeholder + sentinel pixel at top-right so MC
+        # doesn't auto-crop the glyph's advance down to zero. Without the
+        # sentinel, placeElement's shift-back math under-compensates and
+        # every HUD frame drifts by the missing 17 pixels.
+        ph = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        ph.putpixel((15, 0), (0, 0, 0, 1))
+        ph.save(TEXTURES_OUT / "graveyard_head.png")
 
     # Bar slices
     for bar, (fname, _, _) in BAR_SOURCES.items():
