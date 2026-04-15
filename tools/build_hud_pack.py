@@ -157,7 +157,7 @@ BAR_SOURCES = {
     # strip below the hotbar.
     "health":  ("health_bar.png",  11, 40),
     "armor":   ("armor_bar.png",   15, 20),
-    "exp":     ("exp_bar.png",      3, 40),
+    "exp":     ("exp_bar.png",      2, 40),
 }
 BAR_PAD_HEIGHT = {
     "health": 40,
