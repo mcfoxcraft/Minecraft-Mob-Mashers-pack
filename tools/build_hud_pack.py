@@ -81,12 +81,16 @@ PLATES = [
     # Minecraft enforces 0 <= ascent <= height, where ascent = pixels the
     # glyph extends above the text baseline. Content sits at the top of a
     # padded canvas; ascent == padded_height pushes that content upward.
-    (0xE000, "top_left.png",         TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
-    (0xE001, "top_right_base.png",   TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
-    (0xE002, "top_right_east.png",   TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
-    (0xE003, "top_right_north.png",  TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
-    (0xE004, "top_right_south.png",  TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
-    (0xE005, "top_right_west.png",   TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
+    # ascent stays at TOP_LEFT_NATURAL_H (=plate content height) while
+    # height grows with the padded canvas. Same trick as the digit and
+    # head glyphs below — content bottom-anchored, ascent unchanged,
+    # canvas grows to push visible pixels downward.
+    (0xE000, "top_left.png",         TOP_LEFT_NATURAL_H, TOP_PLATE_PADDED_HEIGHT),
+    (0xE001, "top_right_base.png",   TOP_LEFT_NATURAL_H, TOP_PLATE_PADDED_HEIGHT),
+    (0xE002, "top_right_east.png",   TOP_LEFT_NATURAL_H, TOP_PLATE_PADDED_HEIGHT),
+    (0xE003, "top_right_north.png",  TOP_LEFT_NATURAL_H, TOP_PLATE_PADDED_HEIGHT),
+    (0xE004, "top_right_south.png",  TOP_LEFT_NATURAL_H, TOP_PLATE_PADDED_HEIGHT),
+    (0xE005, "top_right_west.png",   TOP_LEFT_NATURAL_H, TOP_PLATE_PADDED_HEIGHT),
     # Under plates sit at hotbar level framing the hotbar.
     (0xE006, "under_left.png",        22, 86),
     (0xE007, "under_right.png",       22, 86),
