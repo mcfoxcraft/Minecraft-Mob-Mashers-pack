@@ -171,7 +171,7 @@ SMALL_DIGIT_CANVAS_H = 30   # level canvas (smaller, content at bottom)
 # canvas so ascent=HEAD_ASCENT lifts it up onto the top-left plate.
 HEAD_CONTENT_PX = 16
 HEAD_CANVAS_H   = 220
-HEAD_ASCENT     = 216
+HEAD_ASCENT     = 211
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
