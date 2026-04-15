@@ -67,7 +67,7 @@ BAR_STEPS = 25
 # position. The skull, balance, and time ascents below are all expressed
 # as offsets from it, so raising this shifts the entire group upward
 # (plate + head + both text rows).
-TOP_PLATE_PADDED_HEIGHT = 255
+TOP_PLATE_PADDED_HEIGHT = 270
 
 PLATES = [
     # (codepoint, output_png, ascent, height)
