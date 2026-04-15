@@ -63,17 +63,16 @@ BAR_STEPS = 25
 PLATES = [
     # (codepoint, output_png, ascent, height)
     # Minecraft enforces 0 <= ascent <= height, where ascent = pixels the
-    # glyph extends above the text baseline. To push top plates up toward
-    # the upper screen we pad the source texture's *height* with transparent
-    # rows below the content and set ascent = padded_height. The 44px-tall
-    # plate content then renders near the top of a 200px-tall canvas that
-    # reaches 200 pixels above the action-bar baseline.
-    (0xE000, "top_left.png",         200, 200),
-    (0xE001, "top_right_base.png",   200, 200),
-    (0xE002, "top_right_east.png",   200, 200),
-    (0xE003, "top_right_north.png",  200, 200),
-    (0xE004, "top_right_south.png",  200, 200),
-    (0xE005, "top_right_west.png",   200, 200),
+    # glyph extends above the text baseline. Content sits at the top of a
+    # padded canvas; ascent == padded_height pushes that content upward.
+    # 120 chosen empirically — 200 was either above the top of the viewport
+    # or hit an MC clip limit and rendered nothing.
+    (0xE000, "top_left.png",         120, 120),
+    (0xE001, "top_right_base.png",   120, 120),
+    (0xE002, "top_right_east.png",   120, 120),
+    (0xE003, "top_right_north.png",  120, 120),
+    (0xE004, "top_right_south.png",  120, 120),
+    (0xE005, "top_right_west.png",   120, 120),
     # Under plates stay at hotbar level. ascent=30, height=86 puts top of
     # glyph 30px above baseline, bottom 56px below baseline — sits across
     # the hotbar + extension area.
@@ -85,7 +84,7 @@ PLATES = [
 # Top plates get padded to this pixel height so their ascent can reach
 # high enough to land near the top of the screen. Must match the
 # ascent/height values in PLATES above for the top-plate entries.
-TOP_PLATE_PADDED_HEIGHT = 200
+TOP_PLATE_PADDED_HEIGHT = 120
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
