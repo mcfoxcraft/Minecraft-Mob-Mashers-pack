@@ -67,12 +67,12 @@ PLATES = [
     # padded canvas; ascent == padded_height pushes that content upward.
     # 120 chosen empirically — 200 was either above the top of the viewport
     # or hit an MC clip limit and rendered nothing.
-    (0xE000, "top_left.png",         180, 180),
-    (0xE001, "top_right_base.png",   180, 180),
-    (0xE002, "top_right_east.png",   180, 180),
-    (0xE003, "top_right_north.png",  180, 180),
-    (0xE004, "top_right_south.png",  180, 180),
-    (0xE005, "top_right_west.png",   180, 180),
+    (0xE000, "top_left.png",         220, 220),
+    (0xE001, "top_right_base.png",   220, 220),
+    (0xE002, "top_right_east.png",   220, 220),
+    (0xE003, "top_right_north.png",  220, 220),
+    (0xE004, "top_right_south.png",  220, 220),
+    (0xE005, "top_right_west.png",   220, 220),
     # Under plates sit at hotbar level framing the hotbar. ascent=22 lands
     # the plate's middle at the hotbar-item row — 30 floated slightly too
     # high, 15 dropped the bottom past the viewport.
@@ -87,7 +87,7 @@ PLATES = [
 # Top plates get padded to this pixel height so their ascent can reach
 # high enough to land near the top of the screen. Must match the
 # ascent/height values in PLATES above for the top-plate entries.
-TOP_PLATE_PADDED_HEIGHT = 180
+TOP_PLATE_PADDED_HEIGHT = 220
 
 # Custom digit glyphs used to render coin balance + run timer on top of
 # the top-left plate. 5 pixel cols * 7 rows per digit, padded to a tall
@@ -112,9 +112,9 @@ DIGIT_PATTERNS = {
 # time uses a lower ascent so they stack vertically on the plate.
 DIGIT_BASE_BALANCE = 0xE200  # 0..9 at 0xE200..0xE209, ':' at 0xE20A
 DIGIT_BASE_TIME    = 0xE220  # 0..9 at 0xE220..0xE229, ':' at 0xE22A
-DIGIT_BALANCE_ASCENT = 175
-DIGIT_TIME_ASCENT    = 165
-DIGIT_CANVAS_H       = 180  # must be >= max(ascent) for ascent<=height rule
+DIGIT_BALANCE_ASCENT = 215
+DIGIT_TIME_ASCENT    = 205
+DIGIT_CANVAS_H       = 220  # must be >= max(ascent) for ascent<=height rule
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
 # at the base. Index 0 = empty, BAR_STEPS-1 = full.
