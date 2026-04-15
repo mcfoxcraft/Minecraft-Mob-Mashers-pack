@@ -63,22 +63,24 @@ BAR_STEPS = 25
 # render below (ascent > 0). Numeric ascents are tuned so the plate art
 # lands roughly where BetterHud's renderer would have placed it relative
 # to the screen center.
+# Single source of truth for the top-left plate group's vertical
+# position. The skull, balance, and time ascents below are all expressed
+# as offsets from it, so raising this shifts the entire group upward
+# (plate + head + both text rows).
+TOP_PLATE_PADDED_HEIGHT = 320
+
 PLATES = [
     # (codepoint, output_png, ascent, height)
     # Minecraft enforces 0 <= ascent <= height, where ascent = pixels the
     # glyph extends above the text baseline. Content sits at the top of a
     # padded canvas; ascent == padded_height pushes that content upward.
-    # 120 chosen empirically — 200 was either above the top of the viewport
-    # or hit an MC clip limit and rendered nothing.
-    (0xE000, "top_left.png",         220, 220),
-    (0xE001, "top_right_base.png",   220, 220),
-    (0xE002, "top_right_east.png",   220, 220),
-    (0xE003, "top_right_north.png",  220, 220),
-    (0xE004, "top_right_south.png",  220, 220),
-    (0xE005, "top_right_west.png",   220, 220),
-    # Under plates sit at hotbar level framing the hotbar. ascent=22 lands
-    # the plate's middle at the hotbar-item row — 30 floated slightly too
-    # high, 15 dropped the bottom past the viewport.
+    (0xE000, "top_left.png",         TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
+    (0xE001, "top_right_base.png",   TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
+    (0xE002, "top_right_east.png",   TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
+    (0xE003, "top_right_north.png",  TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
+    (0xE004, "top_right_south.png",  TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
+    (0xE005, "top_right_west.png",   TOP_PLATE_PADDED_HEIGHT, TOP_PLATE_PADDED_HEIGHT),
+    # Under plates sit at hotbar level framing the hotbar.
     (0xE006, "under_left.png",        22, 86),
     (0xE007, "under_right.png",       22, 86),
     (0xE008, "graveyard_head.png",    16, 16),
@@ -86,16 +88,6 @@ PLATES = [
     # across the hotbar between the left and right under plates.
     (0xE009, "under_middle.png",      22, 86),
 ]
-
-# Top plates get padded to this pixel height so their ascent can reach
-# high enough to land near the top of the screen. Must match the
-# ascent/height values in PLATES above for the top-plate entries.
-#
-# This is the SINGLE source of truth for the top-left plate group's
-# vertical position. The skull, balance, and time ascents below are all
-# expressed as offsets from it, so raising TOP_PLATE_PADDED_HEIGHT
-# shifts the entire group upward (plate + head + both text rows).
-TOP_PLATE_PADDED_HEIGHT = 220
 
 # Custom digit glyphs used to render coin balance + run timer on top of
 # the top-left plate. 5 pixel cols * 7 rows per digit, padded to a tall
@@ -176,13 +168,15 @@ DIGIT_TIME_ASCENT     = TOP_PLATE_PADDED_HEIGHT - TIME_ASCENT_OFFSET
 # whole glyph so the visible content lands where the diamond sits
 # (roughly -10 below the action-bar baseline).
 DIGIT_LEVEL_ASCENT   = 6
-DIGIT_CANVAS_H       = 220  # balance + time canvas
+# Canvas for balance + time digits. Tracks TOP_PLATE_PADDED_HEIGHT so
+# ascent <= height stays satisfied when the group is lifted.
+DIGIT_CANVAS_H       = TOP_PLATE_PADDED_HEIGHT
 SMALL_DIGIT_CANVAS_H = 30   # level canvas (smaller, content at bottom)
 
 # Character head canvas. 16x16 head content pasted at the top of a tall
 # canvas so ascent=HEAD_ASCENT lifts it up onto the top-left plate.
 HEAD_CONTENT_PX = 16
-HEAD_CANVAS_H   = 220
+HEAD_CANVAS_H   = TOP_PLATE_PADDED_HEIGHT
 HEAD_ASCENT     = TOP_PLATE_PADDED_HEIGHT - HEAD_ASCENT_OFFSET
 
 # Bar codepoint ranges: each bar gets BAR_STEPS sequential codepoints starting
