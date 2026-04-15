@@ -77,7 +77,9 @@ BAR_BASES = {
 BAR_SOURCES = {
     "health":  ("health_bar.png", -78,  7),  # ascent below baseline so they sit at chest-bar level
     "armor":   ("armor_bar.png",  -85,  7),
-    "exp":     ("exp_bar.png",      9,  3),  # under the action-bar text — exp belt
+    # Minecraft enforces ascent <= height on bitmap glyphs, so anything taller
+    # than the exp bar's 3px height would fail font load. Keep it at the limit.
+    "exp":     ("exp_bar.png",      3,  3),  # under the action-bar text — exp belt
 }
 
 # Horizontal positioning glyphs (space provider). Negative = backtrack,
