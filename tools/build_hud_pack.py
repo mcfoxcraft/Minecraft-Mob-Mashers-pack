@@ -122,7 +122,11 @@ DIGIT_PATTERNS = {
     '7': ["#####", "....#", "...#.", "..#..", ".#...", ".#...", ".#..."],
     '8': [".###.", "#...#", "#...#", ".###.", "#...#", "#...#", ".###."],
     '9': [".###.", "#...#", "#...#", ".####", "....#", "#...#", ".###."],
-    ':': ["....", "..#.", "..#.", "....", "..#.", "..#.", "...."],
+    # 5 columns wide to match the digits: the rasterizer pins width to the
+    # pattern's max row length, and the plugin's HudGlyphs.DIGIT_ADVANCE (6)
+    # is applied uniformly to every char in a number run. A 4-wide colon
+    # advanced only 5, drifting every digit after "M:SS" 1px left.
+    ':': [".....", "..#..", "..#..", ".....", "..#..", "..#..", "....."],
 }
 
 # Compact 3x5 digit patterns used for the level readout in the
@@ -138,7 +142,9 @@ SMALL_DIGIT_PATTERNS = {
     '7': ["###", "..#", "..#", ".#.", ".#."],
     '8': ["###", "#.#", "###", "#.#", "###"],
     '9': ["###", "#.#", "###", "..#", "##."],
-    ':': ["..", ".#", "..", ".#", ".."],
+    # 3 columns wide to match the small digits (advance 4 = DIGIT_SMALL_ADVANCE);
+    # latent today since level strings contain no colon, fixed for consistency.
+    ':': ["...", ".#.", "...", ".#.", "..."],
 }
 SMALL_DIGIT_ADVANCE = 4  # texture width 3 + 1 default spacing
 
@@ -330,7 +336,12 @@ def slice_bar(src: Path, out_dir: Path, name: str,
     out_dir.mkdir(parents=True, exist_ok=True)
     paste_y = canvas_h - src_h if content_at_bottom else 0
     for i in range(BAR_STEPS):
-        fill_px = round((i + 1) * w / BAR_STEPS)
+        # Index 0 must be EMPTY and index BAR_STEPS-1 FULL (see BAR_BASES
+        # contract, and HudGlyphs.barIndex which maps ratio 0.0 -> index 0).
+        # The old `(i + 1) * w / BAR_STEPS` made index 0 one step filled, so a
+        # bar could never render empty (0 HP still showed a sliver) and every
+        # step read ~one notch high. Spread 0..w across BAR_STEPS-1 gaps.
+        fill_px = round(i * w / (BAR_STEPS - 1))
         frame = Image.new("RGBA", (w, canvas_h), (0, 0, 0, 0))
         if fill_px > 0:
             frame.paste(base.crop((0, 0, fill_px, src_h)), (0, paste_y))
