@@ -8,20 +8,24 @@ Client-side assets for the [FoxMobMashers](https://github.com/mcfoxcraft/Minecra
 pack.mcmeta
 assets/foxmobmashers/
   sounds.json                # sound events exposed to the plugin
-  sounds/music/*.ogg         # track variants for music.run
-  font/hud.json              # generated; gitignored
+  sounds/music/*.ogg         # one .ogg per music.track.* event
   textures/hud/...           # generated; gitignored
+assets/minecraft/
+  font/default.json          # generated; gitignored (overrides the default font)
 ```
 
-The `music.run` sound event declares all tracks as variants. Minecraft picks one at random every time the plugin triggers the event, so rotation happens client-side with no plugin changes.
+Each track is its own `foxmobmashers:music.track.*` sound event. The plugin's
+`music.run_tracks` / `music.boss_tracks` config lists pick one at random and
+schedule the next by the per-entry duration (see the config example below), so
+rotation is driven server-side, not by client-side sound variants.
 
 ## Animated HUD assets (generated)
 
 The HUD plates, compass, and bars are derived from a 3rd-party BetterHud-format source pack whose textures are not redistributable in source form. The build pipeline:
 
 1. Drop the source pack's `assets/` dir somewhere local (e.g. `tools/source/`).
-2. Run `python3 tools/build_hud_pack.py tools/source/`. This stitches per-frame sequences into vertical strips with `.mcmeta` animations, slices the bars into 25 reveal frames each, and writes `assets/foxmobmashers/font/hud.json` mapping every glyph to a Private-Use-Area codepoint.
-3. The generated `textures/hud/` and `font/hud.json` are gitignored — they live only in your local working tree and inside the release `dist/` zip.
+2. Run `python3 tools/build_hud_pack.py tools/source/`. This stitches per-frame sequences into vertical strips with `.mcmeta` animations, slices the bars into 25 reveal frames each, and writes `assets/minecraft/font/default.json` mapping every glyph to a Private-Use-Area codepoint (the default font is overridden so the glyphs resolve without a server-side `Style.font()` annotation).
+3. The generated `textures/hud/` and `assets/minecraft/font/default.json` are gitignored — they live only in your local working tree and inside the release `dist/` zip.
 
 Codepoint allocations are the contract between this pack and the plugin's `HudGlyphs.java`. Edit both sides if you remap them.
 
@@ -37,8 +41,14 @@ resource_pack:
   sha1: "<sha1 from release notes>"
   required: false
 music:
-  run_track: "foxmobmashers:music.run"
-  run_track_length_seconds: 120
+  # One entry per track: "<sound_event_key>|<duration_seconds>|<author>".
+  # The plugin picks one at random, plays it, and schedules the next pick when
+  # the duration elapses. Each key must be its own event in sounds.json.
+  run_tracks:
+    - "foxmobmashers:music.track.abyssal_echoes|121|AlkaKrab"
+    - "foxmobmashers:music.track.cursed_shadows|97|AlkaKrab"
+  boss_tracks:
+    - "foxmobmashers:music.track.chaos_lullaby|194|AlkaKrab"
   volume: 0.6
 ```
 
