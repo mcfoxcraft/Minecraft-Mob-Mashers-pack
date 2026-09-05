@@ -241,6 +241,20 @@ def main(argv):
             tns, tname = tex.split(":")
             assert (ROOT / f"assets/{tns}/textures/{tname}.png").exists(), f"{model_path.name}: missing texture {tex}"
     if check:
+        # The release zip must carry every generated file byte-for-byte; the
+        # first build of #11 shipped a zip without any of them.
+        dist = ROOT / "dist" / "foxmobmashers-resourcepack.zip"
+        if dist.exists():
+            import zipfile
+            with zipfile.ZipFile(dist) as z:
+                names = set(z.namelist())
+                for rel, data in outputs().items():
+                    if rel not in names:
+                        stale.append(f"{rel} (missing from dist zip — run tools/build_dist.py)")
+                    elif z.read(rel) != data:
+                        stale.append(f"{rel} (dist zip has stale bytes — run tools/build_dist.py)")
+                if z.read("pack.mcmeta") != (ROOT / "pack.mcmeta").read_bytes():
+                    stale.append("pack.mcmeta (dist zip has stale bytes — run tools/build_dist.py)")
         if stale:
             print("STALE (run tools/build_items.py):\n  " + "\n  ".join(stale))
             return 1

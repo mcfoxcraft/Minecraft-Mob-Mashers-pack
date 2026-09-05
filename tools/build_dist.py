@@ -15,7 +15,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist" / "foxmobmashers-resourcepack.zip"
 
-tracked = subprocess.run(["git", "ls-files", "pack.mcmeta", "assets"], cwd=ROOT,
+# Cached AND untracked-but-not-ignored, so a freshly generated file that has not
+# been `git add`ed yet still ships (the first build of #11 missed every new item
+# override for exactly that reason). Ignored files (the HUD art) are excluded
+# here and carried forward from the previous zip below.
+tracked = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard",
+                          "pack.mcmeta", "assets"], cwd=ROOT,
                          capture_output=True, text=True, check=True).stdout.split()
 tracked_set = set(tracked)
 
@@ -30,6 +35,12 @@ with zipfile.ZipFile(DIST) as old, zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATE
     for rel in sorted(tracked):
         new.write(ROOT / rel, rel)
 DIST.write_bytes(buf.getvalue())
+# Every non-ignored pack file on disk must be in the zip — fail loudly otherwise.
+with zipfile.ZipFile(DIST) as check:
+    names = set(check.namelist())
+    missing = [rel for rel in tracked if rel not in names]
+    assert not missing, f"dist zip is missing {missing}"
+    assert "pack.mcmeta" in names
 sha1 = hashlib.sha1(buf.getvalue()).hexdigest()
 (DIST.with_suffix(".zip.sha1")).write_text(sha1 + "\n")
 print(f"kept {kept} generated entries, added {len(tracked)} tracked files, sha1 {sha1}")
