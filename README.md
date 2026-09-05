@@ -49,6 +49,20 @@ The weapon ids are the contract with the plugin's `weapons/WeaponVisuals.java`
 FoxParkour pack ships): 1.21.11 clients are format 75 and the item definitions above need
 the ≥ 46 regime (#4).
 
+## Bedrock (Geyser) — weapon sprites for Bedrock players (#10)
+
+`tools/build_bedrock.py` generates, from the same sprite table:
+
+- `bedrock/geyser_mappings.json` — Geyser custom-item mappings (format v2), one `definition` entry
+  per weapon with a `custom_model_data` string match on `foxmobmashers:<weapon>`;
+- `bedrock/foxmobmashers-bedrock.mcpack` — the Bedrock resource pack (manifest, `item_texture.json`,
+  the 16×16 sprites), reproducible byte-for-byte.
+
+Install on the **Geyser instance** (the proxy — this is proxy-wide, every Bedrock player downloads
+the pack): mappings → `plugins/Geyser-<platform>/custom_mappings/`, the `.mcpack` → `packs/`,
+`enable-custom-content: true`, then `geyser reload`. Nothing changes for Java players; Bedrock
+players without it keep seeing the vanilla dropped item.
+
 ## Using the pack
 
 In your server's `plugins/FoxMobMashers/config.yml`:
