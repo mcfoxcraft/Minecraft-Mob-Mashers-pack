@@ -351,16 +351,18 @@ def main(argv):
         else:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
-    # Every model referenced by an item definition must exist, with its texture.
-    for item_def in (ROOT / "assets/minecraft/items").glob("*.json"):
+    # Every model referenced by one of OUR item definitions must exist, with its
+    # texture(s). Other overrides (build_decals.py's paper.json) validate themselves.
+    for item in {v[0] for v in SPRITES.values()}:
+        item_def = ROOT / f"assets/minecraft/items/{item}.json"
         model = json.loads(item_def.read_text())["model"]
         for case in model["cases"]:
             ns, name = case["model"]["model"].split(":")
             model_path = ROOT / f"assets/{ns}/models/{name}.json"
             assert model_path.exists(), f"{item_def.name}: missing model {model_path}"
-            tex = json.loads(model_path.read_text())["textures"]["layer0"]
-            tns, tname = tex.split(":")
-            assert (ROOT / f"assets/{tns}/textures/{tname}.png").exists(), f"{model_path.name}: missing texture {tex}"
+            for tex in json.loads(model_path.read_text())["textures"].values():
+                tns, tname = tex.split(":")
+                assert (ROOT / f"assets/{tns}/textures/{tname}.png").exists(), f"{model_path.name}: missing texture {tex}"
     if check:
         # The release zip must carry every generated file byte-for-byte; the
         # first build of #11 shipped a zip without any of them.

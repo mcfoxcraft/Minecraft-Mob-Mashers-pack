@@ -1,0 +1,125 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "foxmobmashers:decal/garlic",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/garlic"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/soul_eater",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/soul_eater"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/vicious_hunger",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/vicious_hunger"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/laurel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/laurel"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/crimson_shroud",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/crimson_shroud"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/infinite_corridor",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/infinite_corridor"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/water",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/water"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/fire",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/fire"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/petal",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/petal"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/shadow",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/shadow"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/holy",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/holy"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/arcane",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/arcane"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/pentagram",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/pentagram"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/moon",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/moon"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/boss_telegraph",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/boss_telegraph"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/mob_aura",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/mob_aura"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/paper"
+    }
+  }
+}
