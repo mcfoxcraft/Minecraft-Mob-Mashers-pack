@@ -1,0 +1,22 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "foxmobmashers:font/damage.png",
+      "height": 12,
+      "ascent": 11,
+      "chars": [
+        "\ue400\ue401\ue402\ue403\ue404\ue405\ue406\ue407\ue408\ue409"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "foxmobmashers:font/damage.png",
+      "height": 18,
+      "ascent": 16,
+      "chars": [
+        "\ue410\ue411\ue412\ue413\ue414\ue415\ue416\ue417\ue418\ue419"
+      ]
+    }
+  ]
+}
