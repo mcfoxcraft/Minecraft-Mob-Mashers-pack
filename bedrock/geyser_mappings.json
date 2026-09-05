@@ -1,0 +1,271 @@
+{
+  "format_version": 2,
+  "items": {
+    "minecraft:iron_axe": [
+      {
+        "type": "definition",
+        "model": "minecraft:iron_axe",
+        "bedrock_identifier": "foxmobmashers:axe",
+        "display_name": "Axe",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:axe",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:axe",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:iron_hoe": [
+      {
+        "type": "definition",
+        "model": "minecraft:iron_hoe",
+        "bedrock_identifier": "foxmobmashers:cross",
+        "display_name": "Cross",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:cross",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:cross",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:book": [
+      {
+        "type": "definition",
+        "model": "minecraft:book",
+        "bedrock_identifier": "foxmobmashers:king_bible",
+        "display_name": "King Bible",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:king_bible",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:king_bible",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:iron_sword": [
+      {
+        "type": "definition",
+        "model": "minecraft:iron_sword",
+        "bedrock_identifier": "foxmobmashers:knife",
+        "display_name": "Knife",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:knife",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:knife",
+          "display_handheld": true,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:bone": [
+      {
+        "type": "definition",
+        "model": "minecraft:bone",
+        "bedrock_identifier": "foxmobmashers:bone",
+        "display_name": "Bone",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:bone",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:bone",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:feather": [
+      {
+        "type": "definition",
+        "model": "minecraft:feather",
+        "bedrock_identifier": "foxmobmashers:peachone",
+        "display_name": "Peachone",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:peachone",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:peachone",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:netherite_axe": [
+      {
+        "type": "definition",
+        "model": "minecraft:netherite_axe",
+        "bedrock_identifier": "foxmobmashers:death_spiral",
+        "display_name": "Death Spiral",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:death_spiral",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:death_spiral",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:netherite_hoe": [
+      {
+        "type": "definition",
+        "model": "minecraft:netherite_hoe",
+        "bedrock_identifier": "foxmobmashers:heaven_sword",
+        "display_name": "Heaven Sword",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:heaven_sword",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:heaven_sword",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:enchanted_book": [
+      {
+        "type": "definition",
+        "model": "minecraft:enchanted_book",
+        "bedrock_identifier": "foxmobmashers:unholy_vespers",
+        "display_name": "Unholy Vespers",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:unholy_vespers",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:unholy_vespers",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:phantom_membrane": [
+      {
+        "type": "definition",
+        "model": "minecraft:phantom_membrane",
+        "bedrock_identifier": "foxmobmashers:ebony_wings",
+        "display_name": "Ebony Wings",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:ebony_wings",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:ebony_wings",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:elytra": [
+      {
+        "type": "definition",
+        "model": "minecraft:elytra",
+        "bedrock_identifier": "foxmobmashers:vandalier",
+        "display_name": "Vandalier",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:vandalier",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:vandalier",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:minecart": [
+      {
+        "type": "definition",
+        "model": "minecraft:minecart",
+        "bedrock_identifier": "foxmobmashers:carrello",
+        "display_name": "Carrello",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:carrello",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:carrello",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:netherite_sword": [
+      {
+        "type": "definition",
+        "model": "minecraft:netherite_sword",
+        "bedrock_identifier": "foxmobmashers:fuwalafuwaloo",
+        "display_name": "Fuwalafuwaloo",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:fuwalafuwaloo",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:fuwalafuwaloo",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:golden_sword": [
+      {
+        "type": "definition",
+        "model": "minecraft:golden_sword",
+        "bedrock_identifier": "foxmobmashers:vento_sacro",
+        "display_name": "Vento Sacro",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:vento_sacro",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:vento_sacro",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ]
+  }
+}
