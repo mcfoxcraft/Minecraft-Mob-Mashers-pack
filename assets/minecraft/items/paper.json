@@ -115,6 +115,27 @@
           "type": "minecraft:model",
           "model": "foxmobmashers:decal/mob_aura"
         }
+      },
+      {
+        "when": "foxmobmashers:decal/whip_slash",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/whip_slash"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/bloody_slash",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/bloody_slash"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/lancet_beam",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/lancet_beam"
+        }
       }
     ],
     "fallback": {

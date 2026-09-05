@@ -111,6 +111,76 @@ DECALS = {
 }
 
 
+# ── step 4 sprites: short-lived animated quads (#8) ────────────────────────────
+# Painters take (u, v, t) with t in [0,1) the animation progress; frames are
+# stacked vertically and an .mcmeta plays them at FRAMETIME ticks each.
+SPRITE_FRAMES = 4
+SPRITE_FRAMETIME = 3   # 4 × 3 = 12 ticks, the plugin's PULSE_TICKS
+
+
+def crescent(core, edge):
+    """A slash swept across the full width: thick in the middle, thin at the tips,
+    bowed toward -v. Fades and thins over the animation."""
+    def px(u, v, t):
+        if abs(u) >= 1.0:
+            return 0, 0, 0, 0
+        thick = 0.22 * (1 - u * u) * (1.0 - 0.6 * t)
+        centre = -0.18 * (1 - u * u)
+        d = abs(v - centre)
+        if d > thick + 0.03:
+            return 0, 0, 0, 0
+        fade = 1.0 - t * 0.85
+        if d < thick * 0.55:
+            c, a = core, 1.0
+        else:
+            c, a = edge, max(0.0, 1.0 - (d - thick * 0.55) / (thick * 0.45 + 0.03))
+        return c[0], c[1], c[2], int(255 * a * fade)
+    return px
+
+
+def beam(core, glow):
+    """A horizontal beam the full width of the quad with a soft glow, fading out."""
+    def px(u, v, t):
+        fade = 1.0 - t * 0.8
+        d = abs(v)
+        cap = 1.0 - max(0.0, (abs(u) - 0.9) / 0.1)   # soften the ends
+        if d < 0.09:
+            return core[0], core[1], core[2], int(255 * fade * cap)
+        if d < 0.30:
+            a = 1.0 - (d - 0.09) / 0.21
+            return glow[0], glow[1], glow[2], int(230 * a * a * fade * cap)
+        return 0, 0, 0, 0
+    return px
+
+
+SPRITES = {
+    "whip_slash":   crescent((255, 255, 255), (200, 200, 210)),
+    "bloody_slash": crescent((255, 90, 90), (150, 20, 30)),
+    "lancet_beam":  beam((240, 250, 255), (100, 180, 255)),
+}
+
+
+def sprite_png_bytes(fn):
+    raw = bytearray()
+    for frame in range(SPRITE_FRAMES):
+        t = frame / SPRITE_FRAMES
+        for y in range(SIZE):
+            raw.append(0)
+            for x in range(SIZE):
+                u = (x + 0.5) / SIZE * 2 - 1
+                v = (y + 0.5) / SIZE * 2 - 1
+                r, g, b, a = fn(u, v, t)
+                raw += bytes((r, g, b, a))
+
+    def chunk(tag, data):
+        return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+
+    return (b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", struct.pack(">IIBBBBB", SIZE, SIZE * SPRITE_FRAMES, 8, 6, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(bytes(raw), 9))
+            + chunk(b"IEND", b""))
+
+
 def png_bytes(fn):
     raw = bytearray()
     for y in range(SIZE):
@@ -151,6 +221,20 @@ def outputs():
                 },
             }],
         }).encode()
+    for kind, fn in SPRITES.items():
+        out[f"assets/{NS}/textures/decal/{kind}.png"] = sprite_png_bytes(fn)
+        out[f"assets/{NS}/textures/decal/{kind}.png.mcmeta"] = dumps(
+            {"animation": {"frametime": SPRITE_FRAMETIME, "interpolate": False}}).encode()
+        out[f"assets/{NS}/models/decal/{kind}.json"] = dumps({
+            "textures": {"d": f"{NS}:decal/{kind}"},
+            "elements": [{
+                "from": [0, 8, 0], "to": [16, 8, 16], "shade": False,
+                "faces": {
+                    "up":   {"uv": [0, 0, 16, 16], "texture": "#d"},
+                    "down": {"uv": [0, 0, 16, 16], "texture": "#d"},
+                },
+            }],
+        }).encode()
     out[f"assets/minecraft/items/paper.json"] = dumps({
         "model": {
             "type": "minecraft:select",
@@ -158,7 +242,7 @@ def outputs():
             "index": 0,
             "cases": [
                 {"when": f"{NS}:decal/{k}", "model": {"type": "minecraft:model", "model": f"{NS}:decal/{k}"}}
-                for k in DECALS
+                for k in list(DECALS) + list(SPRITES)
             ],
             "fallback": {"type": "minecraft:model", "model": "minecraft:item/paper"},
         }
@@ -192,9 +276,9 @@ def main(argv):
         if stale:
             print("STALE (run tools/build_decals.py):\n  " + "\n  ".join(stale))
             return 1
-        print(f"ok: {len(DECALS)} decals in sync")
+        print(f"ok: {len(DECALS)} decals + {len(SPRITES)} sprites in sync")
     else:
-        print(f"wrote {len(DECALS)} decals: {', '.join(DECALS)}")
+        print(f"wrote {len(DECALS)} decals + {len(SPRITES)} sprites")
     return 0
 
 
