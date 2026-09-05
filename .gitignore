@@ -7,3 +7,6 @@
 /assets/foxmobmashers/textures/hud/
 /assets/minecraft/font/default.json
 /tools/source/
+
+# Python bytecode from running tools/*.py
+__pycache__/
