@@ -1,7 +1,10 @@
 {
   "pack": {
-    "pack_format": 34,
-    "supported_formats": [34, 64],
-    "description": "FoxMobMashers — music and custom assets"
+    "pack_format": 88,
+    "supported_formats": {
+      "min_inclusive": 46,
+      "max_inclusive": 88
+    },
+    "description": "FoxMobMashers — music, HUD and weapon sprites"
   }
 }
