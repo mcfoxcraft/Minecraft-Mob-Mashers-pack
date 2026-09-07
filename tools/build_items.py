@@ -185,25 +185,99 @@ SPRITES = {
     }, BOOK_ROWS),
     # handheld: the Knife is rendered in an invisible vex's hand, not as a
     # free-floating display, so keep the vanilla in-hand transforms.
-    "knife": ("iron_sword", "item/handheld", {
+    # Knife: a flat face-up item display flying tip-first (texture "up" = travel),
+    # not a sword in a vex's hand any more — the 62-pixel diagonal blade of the
+    # first version was a 2 px sliver from the run camera (eyes harness, #20).
+    # Bold vertical blade with a black outline, 6 px wide.
+    "knife": ("iron_sword", "item/generated", {
         "s": (0xC8, 0xCC, 0xD0), "S": (0xF4, 0xF6, 0xF8), "d": (0x7A, 0x80, 0x88),
         "h": (0x3A, 0x2A, 0x1A), "g": (0xB8, 0x90, 0x2A), "o": (0x1A, 0x1A, 0x1A),
     }, [
-        ".............oo.",
-        "............oSo.",
-        "...........oSso.",
-        "..........oSsdo.",
-        ".........oSsdo..",
-        "........oSsdo...",
-        ".......oSsdo....",
-        "......oSsdo.....",
-        ".....oSsdo......",
-        "....ogggo.......",
-        "...ohhoo........",
-        "..ohho..........",
-        ".ohho...........",
-        ".oho............",
-        ".oo.............",
+        ".......oo.......",
+        "......oSSo......",
+        "......oSso......",
+        ".....oSssdo.....",
+        ".....oSssdo.....",
+        ".....oSssdo.....",
+        ".....oSssdo.....",
+        ".....oSssdo.....",
+        ".....oSssdo.....",
+        ".....oSssdo.....",
+        "....ogggggo.....",
+        "....ogggggo.....",
+        ".....ohhho......",
+        ".....ohhho......",
+        ".....ohhho......",
+        "......ooo.......",
+    ]),
+    # ── #21: sprites for the vanilla-entity projectiles ──────────────────────
+    # Magic Wand bolt: a blue-white teardrop flying point-first (up) with a
+    # fading trail. Replaces the snowball (one white pixel from the camera).
+    "magic_wand": ("snowball", "item/generated", {
+        "W": (0xFF, 0xFF, 0xFF), "c": (0xB4, 0xE6, 0xFF), "b": (0x5A, 0xA8, 0xFF),
+        "B": (0x2A, 0x62, 0xD6), "t": (0x8C, 0xC4, 0xFF), "o": (0x10, 0x24, 0x5A),
+    }, [
+        ".......oo.......",
+        "......oWWo......",
+        ".....oWccWo.....",
+        ".....oWccbo.....",
+        "....oWcccbBo....",
+        "....oWccbbBo....",
+        "....oWcbbbBo....",
+        "....ocbbbBBo....",
+        ".....obbBBo.....",
+        ".....oBBBBo.....",
+        "......oBBo......",
+        "......otto......",
+        ".......tt.......",
+        ".......tt.......",
+        "........t.......",
+        "................",
+    ]),
+    # Fire Wand fireball: orange ball with a yellow-white core and flame tips
+    # trailing behind (down). Replaces the small fireball (a 3 px dot).
+    "fire_wand": ("fire_charge", "item/generated", {
+        "W": (0xFF, 0xF8, 0xC8), "y": (0xFF, 0xE0, 0x50), "r": (0xFF, 0x8C, 0x1E),
+        "R": (0xE0, 0x3C, 0x10), "d": (0x8A, 0x1E, 0x08), "o": (0x2A, 0x0A, 0x04),
+    }, [
+        "......oooo......",
+        ".....orrrro.....",
+        "....orryyrro....",
+        "...orryWWyrro...",
+        "...oryWWWWyro...",
+        "...oryWWWWyro...",
+        "...orryWWyrro...",
+        "...oRrryyrrRo...",
+        "....oRrrrrRo....",
+        "....odRrrRdo....",
+        ".....odRRdo.....",
+        "....o.oRRo.o....",
+        "...oRo.oo.oRo...",
+        "...oRo....oRo...",
+        "....o......o....",
+        "................",
+    ]),
+    # Runetracer: a teal crystal bolt with a glowing rune, flying point-first.
+    # Replaces the trident (a 2 px line seen edge-on from above).
+    "runetracer": ("amethyst_shard", "item/generated", {
+        "W": (0xF0, 0xFF, 0xFA), "c": (0x8C, 0xF0, 0xE0), "t": (0x2E, 0xC8, 0xB0),
+        "T": (0x14, 0x8A, 0x7A), "g": (0xC8, 0xFF, 0x64), "o": (0x06, 0x30, 0x2C),
+    }, [
+        ".......oo.......",
+        "......oWWo......",
+        "......ocWo......",
+        ".....occtTo.....",
+        ".....octtTo.....",
+        "....ocggttTo....",
+        "....ocgWgtTo....",
+        "....octggtTo....",
+        "....octtttTo....",
+        ".....ottTTo.....",
+        ".....ottTTo.....",
+        "......oTTo......",
+        "......oTTo......",
+        ".......oo.......",
+        "................",
         "................",
     ]),
     "bone": ("bone", "item/generated", {

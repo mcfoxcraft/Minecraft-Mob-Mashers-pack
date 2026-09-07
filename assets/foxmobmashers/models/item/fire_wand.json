@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "foxmobmashers:item/knife"
+    "layer0": "foxmobmashers:item/fire_wand"
   }
 }
