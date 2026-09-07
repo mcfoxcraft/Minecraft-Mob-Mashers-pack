@@ -72,7 +72,64 @@
         },
         "bedrock_options": {
           "icon": "foxmobmashers:knife",
-          "display_handheld": true,
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:snowball": [
+      {
+        "type": "definition",
+        "model": "minecraft:snowball",
+        "bedrock_identifier": "foxmobmashers:magic_wand",
+        "display_name": "magic_wand",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:magic_wand",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:magic_wand",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:fire_charge": [
+      {
+        "type": "definition",
+        "model": "minecraft:fire_charge",
+        "bedrock_identifier": "foxmobmashers:fire_wand",
+        "display_name": "fire_wand",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:fire_wand",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:fire_wand",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:amethyst_shard": [
+      {
+        "type": "definition",
+        "model": "minecraft:amethyst_shard",
+        "bedrock_identifier": "foxmobmashers:runetracer",
+        "display_name": "runetracer",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:runetracer",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:runetracer",
+          "display_handheld": false,
           "allow_offhand": true
         }
       }
