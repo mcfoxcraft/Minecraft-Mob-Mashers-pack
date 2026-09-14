@@ -241,7 +241,7 @@ def chest(open_lid):
     bands and a lock plate; `open_lid` swings the lid up and lights the opening."""
     def px(u, v):
         if open_lid:
-            lid = _rounded_rect(u, v, -0.86, -0.98, 0.86, OPEN_TOP - 0.04, 0.14)
+            lid = _rounded_rect(u, v, -0.86, -0.98, 0.86, OPEN_TOP + EDGE, 0.14)   # outlines merge: no seam
             if lid <= 0:
                 if lid > -EDGE:
                     return OUTLINE + (255,)
@@ -276,8 +276,8 @@ def _hsv(h, s, v):
 def rays(colour, spokes=12):
     """A turning burst of light behind the opened chest: `spokes` soft lobes that
     rotate one spoke period per animation loop (seamless), fading to the rim,
-    over a bright centre disc. `colour` is (r, g, b) or "rainbow" — a hue wheel
-    that also turns, for the Radiant chest and the evolution fanfare."""
+    over a bright centre disc. `colour` is (r, g, b) or "rainbow" — a fixed hue
+    wheel the lobes turn through, for the Radiant chest and the evolution fanfare."""
     def px(u, v, t):
         r = math.hypot(u, v)
         if r > 1.0:
@@ -291,7 +291,11 @@ def rays(colour, spokes=12):
         if a <= 0.03:
             return 0, 0, 0, 0
         if colour == "rainbow":
-            c = _hsv(((raw / (2 * math.pi)) + t) % 1.0, 0.85, 1.0)
+            # A hue wheel fixed to the angle; the turning lobes sweep through it
+            # and shift colour gently (7.5° of hue per frame). Turning the wheel
+            # itself would have to advance a whole wheel per loop to stay
+            # seamless — a quarter-wheel jump every 3 ticks, a colour strobe.
+            c = _hsv((raw / (2 * math.pi)) % 1.0, 0.85, 1.0)
         else:
             c = colour
         # whiten toward the centre so the core reads as light, not paint
