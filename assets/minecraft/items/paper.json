@@ -136,6 +136,13 @@
           "type": "minecraft:model",
           "model": "foxmobmashers:decal/lancet_beam"
         }
+      },
+      {
+        "when": "foxmobmashers:decal/lightning_strike",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/lightning_strike"
+        }
       }
     ],
     "fallback": {

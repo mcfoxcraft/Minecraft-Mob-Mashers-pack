@@ -153,10 +153,42 @@ def beam(core, glow):
     return px
 
 
+def burst(core, glow, spokes=7):
+    """A lightning strike seen from above (plugin #894): a white-hot core with
+    jagged spokes that flare out across the strike zone, plus a shock ring that
+    races from the centre to the edge. Fades over the animation."""
+    def px(u, v, t):
+        r = math.hypot(u, v)
+        if r > 1.0:
+            return 0, 0, 0, 0
+        ang = math.atan2(v, u)
+        fade = 1.0 - t * 0.75
+        # Spokes zig-zag: each spoke's angle wobbles with radius so they read as
+        # forked bolts rather than a star; they thin toward the rim and over time.
+        wobble = 0.45 * math.sin(r * 12.0 + ang * 2.0)
+        spoke = max(0.0, math.cos(ang * spokes + wobble))
+        spoke = (spoke ** 5) * (1.0 - r * (0.45 + 0.45 * t))
+        core_r = 0.24 * (1.0 - 0.4 * t)
+        ring_r = 0.28 + 0.72 * t
+        ring = max(0.0, 1.0 - abs(r - ring_r) / 0.11)
+        c, a = glow, 0.0
+        if r < core_r:
+            c, a = core, 1.0
+        elif spoke > 0.18:
+            c, a = (core if spoke > 0.55 else glow), min(1.0, spoke * 1.5)
+        if ring > a:
+            c, a = glow, ring
+        if a <= 0.03:
+            return 0, 0, 0, 0
+        return c[0], c[1], c[2], int(255 * min(1.0, a) * fade)
+    return px
+
+
 SPRITES = {
-    "whip_slash":   crescent((255, 255, 255), (200, 200, 210)),
-    "bloody_slash": crescent((255, 90, 90), (150, 20, 30)),
-    "lancet_beam":  beam((240, 250, 255), (100, 180, 255)),
+    "whip_slash":       crescent((255, 255, 255), (200, 200, 210)),
+    "bloody_slash":     crescent((255, 90, 90), (150, 20, 30)),
+    "lancet_beam":      beam((240, 250, 255), (100, 180, 255)),
+    "lightning_strike": burst((255, 255, 235), (140, 215, 255)),   # #894 F
 }
 
 
