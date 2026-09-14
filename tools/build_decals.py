@@ -108,6 +108,8 @@ DECALS = {
     "boss_telegraph":    ring((255, 40, 40, 70),    (255, 90, 90, 235), rims=(0.35, 1.0), rim_w=0.06,
                               lines=[(-0.95, 0, 0.95, 0), (0, -0.95, 0, 0.95)]),
     "mob_aura":          ring((60, 60, 90, 60),     (120, 120, 210, 205), dashes=8),
+    # ── treasure chest cinematic (plugin #900) — painters defined below ─────
+    # (filled in after the painters are defined; see CHEST_DECALS)
 }
 
 
@@ -184,12 +186,178 @@ def burst(core, glow, spokes=7):
     return px
 
 
+# ── #900 treasure chest cinematic ─────────────────────────────────────────────
+# The chest, its light rays, the coin fountain and the reel sparkle the plugin
+# draws for pack viewers when a treasure chest is opened (plugin #900). The chest
+# and coin are static decals (the plugin moves the entities); the rays loop and
+# the sparkle is a one-shot, both on the 4 × 3-tick sprite cadence.
+WOOD, WOOD_D, WOOD_L = (0x8B, 0x5A, 0x2B), (0x5A, 0x36, 0x18), (0xB0, 0x7A, 0x40)
+GOLD, GOLD_D, GOLD_L = (0xE8, 0xB8, 0x30), (0xA8, 0x7A, 0x10), (0xFF, 0xE8, 0x8A)
+OUTLINE = (0x2A, 0x1A, 0x0C)
+# The chest sprite's own box inside the quad: PNG top (v = -1) is screen-up.
+CHEST_HW = 0.82          # body half-width
+CHEST_SEAM = -0.10       # lid / body seam
+CHEST_BOTTOM = 0.80
+LID_TOP = -0.62
+OPEN_TOP = -0.40         # the open chest's body reaches higher: its front shows the glowing opening
+EDGE = 0.05              # outline width
+
+
+def _rounded_rect(u, v, x0, y0, x1, y1, radius):
+    """Signed distance to a rounded rectangle: <= 0 inside."""
+    cx = min(max(u, x0 + radius), x1 - radius)
+    cy = min(max(v, y0 + radius), y1 - radius)
+    return math.hypot(u - cx, v - cy) - radius
+
+
+def _chest_body(u, v, open_lid):
+    """Body + fittings shared by both chest sprites, or None when outside."""
+    top = OPEN_TOP if open_lid else CHEST_SEAM - 0.02
+    d = _rounded_rect(u, v, -CHEST_HW, top, CHEST_HW, CHEST_BOTTOM, 0.08)
+    if d > 0:
+        return None
+    if d > -EDGE:
+        return OUTLINE
+    if open_lid and v < CHEST_SEAM + 0.10:
+        # the opening: light spilling out, brightest toward the lid
+        k = (CHEST_SEAM + 0.10 - v) / (CHEST_SEAM + 0.10 - OPEN_TOP)
+        return (int(GOLD_L[0] + (255 - GOLD_L[0]) * k), int(GOLD_L[1] + (255 - GOLD_L[1]) * k),
+                int(GOLD_L[2] + (255 - GOLD_L[2]) * k))
+    if 0.50 <= abs(u) <= 0.62:                       # vertical gold bands
+        return GOLD_D if v > 0.60 or abs(u) > 0.60 else GOLD
+    if -0.13 <= u <= 0.13 and CHEST_SEAM - 0.02 <= v <= 0.16:   # lock plate
+        if abs(u) <= 0.045 and -0.02 <= v <= 0.10:
+            return OUTLINE                            # keyhole
+        return GOLD_L if u < 0 and v < 0.05 else GOLD
+    if 0.33 <= v <= 0.37:                            # plank line
+        return WOOD_D
+    if v > CHEST_BOTTOM - 0.10:                      # bottom shadow
+        return WOOD_D
+    return WOOD_L if (u < -0.2 and v < 0.3) else WOOD
+
+
+def chest(open_lid):
+    """The VS-style treasure chest seen from the front: a wooden box with gold
+    bands and a lock plate; `open_lid` swings the lid up and lights the opening."""
+    def px(u, v):
+        if open_lid:
+            lid = _rounded_rect(u, v, -0.86, -0.98, 0.86, OPEN_TOP - 0.04, 0.14)
+            if lid <= 0:
+                if lid > -EDGE:
+                    return OUTLINE + (255,)
+                if 0.50 <= abs(u) <= 0.62 or -0.94 <= v <= -0.86:
+                    return GOLD_D + (255,)             # bands on the lid's inside
+                return WOOD_D + (255,)
+        else:
+            lid = _rounded_rect(u, v, -0.86, LID_TOP, 0.86, CHEST_SEAM + 0.06, 0.18)
+            if lid <= 0:
+                if lid > -EDGE:
+                    return OUTLINE + (255,)
+                if 0.50 <= abs(u) <= 0.62:
+                    return GOLD + (255,)
+                if CHEST_SEAM - 0.06 <= v <= CHEST_SEAM + 0.06:
+                    return GOLD + (255,)               # seam band
+                return (WOOD_L if v < -0.45 else WOOD) + (255,)
+        body = _chest_body(u, v, open_lid)
+        if body is None:
+            return 0, 0, 0, 0
+        return body + (255,)
+    return px
+
+
+def _hsv(h, s, v):
+    i = int(h * 6) % 6
+    f = h * 6 - int(h * 6)
+    p, q, t = v * (1 - s), v * (1 - s * f), v * (1 - s * (1 - f))
+    r, g, b = [(v, t, p), (q, v, p), (p, v, t), (p, q, v), (t, p, v), (v, p, q)][i]
+    return int(r * 255), int(g * 255), int(b * 255)
+
+
+def rays(colour, spokes=12):
+    """A turning burst of light behind the opened chest: `spokes` soft lobes that
+    rotate one spoke period per animation loop (seamless), fading to the rim,
+    over a bright centre disc. `colour` is (r, g, b) or "rainbow" — a hue wheel
+    that also turns, for the Radiant chest and the evolution fanfare."""
+    def px(u, v, t):
+        r = math.hypot(u, v)
+        if r > 1.0:
+            return 0, 0, 0, 0
+        raw = math.atan2(v, u)
+        ang = raw + t * (2 * math.pi / spokes)
+        lobe = max(0.0, math.cos(ang * spokes)) ** 3
+        fall = (1.0 - r) ** 0.7
+        disc = max(0.0, 1.0 - r / 0.22)
+        a = min(1.0, lobe * fall * 1.5 + disc)
+        if a <= 0.03:
+            return 0, 0, 0, 0
+        if colour == "rainbow":
+            c = _hsv(((raw / (2 * math.pi)) + t) % 1.0, 0.85, 1.0)
+        else:
+            c = colour
+        # whiten toward the centre so the core reads as light, not paint
+        k = max(0.0, 1.0 - r / 0.35)
+        c = (int(c[0] + (255 - c[0]) * k), int(c[1] + (255 - c[1]) * k), int(c[2] + (255 - c[2]) * k))
+        return c[0], c[1], c[2], int(235 * a)
+    return px
+
+
+def coin():
+    """A gold coin, face on: dark rim, inner ring, a highlight at the top-left."""
+    def px(u, v):
+        r = math.hypot(u, v)
+        if r > 0.92:
+            return 0, 0, 0, 0
+        if r > 0.80:
+            return OUTLINE + (255,)
+        if r > 0.66:
+            return GOLD_D + (255,)
+        if math.hypot(u + 0.28, v + 0.28) < 0.17:
+            return GOLD_L + (255,)
+        if 0.40 <= r <= 0.48:
+            return GOLD_D + (255,)
+        return GOLD + (255,)
+    return px
+
+
+def sparkle(core, glow):
+    """A four-point star that grows over the first half of the animation and
+    shrinks out over the second — the reel's settle flash."""
+    def px(u, v, t):
+        s = math.sin(math.pi * (t + 0.125))        # 0.38 → 0.92 → 0.92 → 0.38
+        fade = 1.0 - 0.45 * t
+        arm = 0.95 * s
+        m = max(abs(u), abs(v))
+        if m > arm:
+            return 0, 0, 0, 0
+        w = 0.10 * s * (1.0 - m / arm)             # arms taper to the tip
+        n = min(abs(u), abs(v))
+        diag = abs(abs(u) - abs(v)) < 0.06 * s and m < 0.45 * s
+        if n < w * 0.5 or math.hypot(u, v) < 0.13 * s:
+            return core[0], core[1], core[2], int(255 * fade)
+        if n < w or diag:
+            return glow[0], glow[1], glow[2], int(220 * fade)
+        return 0, 0, 0, 0
+    return px
+
+
 SPRITES = {
     "whip_slash":       crescent((255, 255, 255), (200, 200, 210)),
     "bloody_slash":     crescent((255, 90, 90), (150, 20, 30)),
     "lancet_beam":      beam((240, 250, 255), (100, 180, 255)),
     "lightning_strike": burst((255, 255, 235), (140, 215, 255)),   # #894 F
+    # ── treasure chest cinematic (plugin #900) ─────────────────────────────
+    "chest_rays_normal": rays((255, 215, 80)),      # Chest: gold
+    "chest_rays_good":   rays((200, 225, 255)),     # Golden Chest: silver-blue
+    "chest_rays_great":  rays("rainbow"),           # Radiant Chest + evolution
+    "sparkle":           sparkle((255, 255, 255), (255, 240, 170)),
 }
+
+CHEST_DECALS = {
+    "chest_closed": chest(open_lid=False),
+    "chest_open":   chest(open_lid=True),
+    "coin":         coin(),
+}
+DECALS.update(CHEST_DECALS)
 
 
 def sprite_png_bytes(fn):

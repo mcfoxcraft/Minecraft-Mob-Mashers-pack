@@ -117,6 +117,27 @@
         }
       },
       {
+        "when": "foxmobmashers:decal/chest_closed",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/chest_closed"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/chest_open",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/chest_open"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/coin",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/coin"
+        }
+      },
+      {
         "when": "foxmobmashers:decal/whip_slash",
         "model": {
           "type": "minecraft:model",
@@ -142,6 +163,34 @@
         "model": {
           "type": "minecraft:model",
           "model": "foxmobmashers:decal/lightning_strike"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/chest_rays_normal",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/chest_rays_normal"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/chest_rays_good",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/chest_rays_good"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/chest_rays_great",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/chest_rays_great"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/sparkle",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/sparkle"
         }
       }
     ],
