@@ -344,6 +344,27 @@ def sparkle(core, glow):
     return px
 
 
+def bar(core, glow, waves=3):
+    """A ground bar the full width of the quad — the hit region's long axis —
+    with bands of light travelling along it (Song of Mana / Mannajja's sound
+    bars, plugin #894 E). Soft top / bottom edges, capped ends, fades over the
+    animation; the bands advance one full period per loop, so it is seamless."""
+    def px(u, v, t):
+        av = abs(v)
+        if av > 0.92 or abs(u) > 1.0:
+            return 0, 0, 0, 0
+        edge = 1.0 - max(0.0, (av - 0.62) / 0.30)
+        cap = 1.0 - max(0.0, (abs(u) - 0.88) / 0.12)
+        wave = 0.5 + 0.5 * math.sin(2 * math.pi * (waves * u - t))
+        fade = 1.0 - 0.55 * t
+        a = edge * cap * (0.35 + 0.65 * wave) * fade
+        if a <= 0.03:
+            return 0, 0, 0, 0
+        c = core if wave > 0.72 else glow
+        return c[0], c[1], c[2], int(255 * min(1.0, a))
+    return px
+
+
 SPRITES = {
     "whip_slash":       crescent((255, 255, 255), (200, 200, 210)),
     "bloody_slash":     crescent((255, 90, 90), (150, 20, 30)),
@@ -354,6 +375,9 @@ SPRITES = {
     "chest_rays_good":   rays((200, 225, 255)),     # Golden Chest: silver-blue
     "chest_rays_great":  rays("rainbow"),           # Radiant Chest + evolution
     "sparkle":           sparkle((255, 255, 255), (255, 240, 170)),
+    # ── the sound bars (plugin #894 E) ─────────────────────────────────────
+    "song_of_mana":      bar((230, 255, 255), (60, 200, 235)),            # aqua, like its particle line
+    "mannajja":          bar((210, 255, 245), (0, 150, 140), waves=4),    # teal, denser bands
 }
 
 CHEST_DECALS = {
