@@ -32,7 +32,7 @@ import build_items  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 NS = "foxmobmashers"
 PACK_NAME = "FoxMobMashers Weapons"
-PACK_VERSION = [1, 1, 0]   # bump whenever the mcpack's content changes: Bedrock caches server packs by uuid + version (batch 3, #26)
+PACK_VERSION = [1, 2, 0]   # bump whenever the mcpack's content changes: Bedrock caches server packs by uuid + version (batch 3, #26)
 
 DISPLAY_NAMES = {
     "axe": "Axe", "cross": "Cross", "king_bible": "King Bible", "knife": "Knife", "bone": "Bone",
@@ -43,6 +43,7 @@ DISPLAY_NAMES = {
     "bracelet": "Bracelet", "bi_bracelet": "Bi-Bracelet", "tri_bracelet": "Tri-Bracelet",
     "phiera_der_tuphello": "Phiera Der Tuphello", "eight_the_sparrow": "Eight The Sparrow",
     "phieraggi": "Phieraggi", "cherry_bomb": "Cherry Bomb", "yatta_daikarin": "Yatta Daikarin",
+    "shadow_pinion": "Shadow Pinion", "valkyrie_turner": "Valkyrie Turner",
 }
 
 
