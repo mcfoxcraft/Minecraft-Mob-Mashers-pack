@@ -238,6 +238,44 @@
         }
       }
     ],
+    "minecraft:echo_shard": [
+      {
+        "type": "definition",
+        "model": "minecraft:echo_shard",
+        "bedrock_identifier": "foxmobmashers:shadow_pinion",
+        "display_name": "Shadow Pinion",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:shadow_pinion",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:shadow_pinion",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:blaze_rod": [
+      {
+        "type": "definition",
+        "model": "minecraft:blaze_rod",
+        "bedrock_identifier": "foxmobmashers:valkyrie_turner",
+        "display_name": "Valkyrie Turner",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:valkyrie_turner",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:valkyrie_turner",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
     "minecraft:fire_charge": [
       {
         "type": "definition",

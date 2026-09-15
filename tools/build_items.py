@@ -389,6 +389,51 @@ SPRITES = {
         ".......oo.......",
         "................",
     ]),
+    # ── #26 batch 3 C (plugin #894 C): the pinion strikes ─────────────────────
+    # Shadow Pinion: a dark violet spike flying point-first, a pale edge glow.
+    "shadow_pinion": ("echo_shard", "item/generated", {
+        "W": (0xD8, 0xC8, 0xFF), "v": (0x8A, 0x5A, 0xD0), "V": (0x4A, 0x28, 0x80),
+        "k": (0x1E, 0x10, 0x38), "o": (0x0C, 0x06, 0x18),
+    }, [
+        ".......oo.......",
+        "......oWWo......",
+        "......oWvo......",
+        ".....oWvvVo.....",
+        ".....oWvvVo.....",
+        ".....ovvVVo.....",
+        ".....ovvVko.....",
+        "....ovvVVkko....",
+        "....ovVVkkko....",
+        "....oVVkkkko....",
+        ".....oVkkko.....",
+        ".....oVkkko.....",
+        "......okko......",
+        "......okko......",
+        ".......oo.......",
+        "................",
+    ]),
+    # Valkyrie Turner: a golden spear with a white-hot tip and a short haft.
+    "valkyrie_turner": ("blaze_rod", "item/generated", {
+        "W": (0xFF, 0xFF, 0xF0), "y": (0xFF, 0xE8, 0x80), "g": (0xE8, 0xB8, 0x30),
+        "d": (0xA8, 0x7A, 0x10), "h": (0x6A, 0x48, 0x18), "o": (0x3A, 0x2A, 0x05),
+    }, [
+        ".......oo.......",
+        "......oWWo......",
+        "......oWWo......",
+        ".....oWWyyo.....",
+        ".....oWyygo.....",
+        ".....oyyggo.....",
+        "....oyyggdo.....",
+        "....oygggdo.....",
+        ".....oggdo......",
+        "....oogddoo.....",
+        "....odhhhdo.....",
+        ".....ohhho......",
+        "......ohho......",
+        "......ohho......",
+        "......odo.......",
+        ".......o........",
+    ]),
     # ── #21: sprites for the vanilla-entity projectiles ──────────────────────
     # Magic Wand bolt: a blue-white teardrop flying point-first (up) with a
     # fading trail. Replaces the snowball (one white pixel from the camera).
