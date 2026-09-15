@@ -39,6 +39,9 @@ DISPLAY_NAMES = {
     "peachone": "Peachone", "death_spiral": "Death Spiral", "heaven_sword": "Heaven Sword",
     "unholy_vespers": "Unholy Vespers", "ebony_wings": "Ebony Wings", "vandalier": "Vandalier",
     "carrello": "Carrello", "fuwalafuwaloo": "Fuwalafuwaloo", "vento_sacro": "Vento Sacro",
+    "bracelet": "Bracelet", "bi_bracelet": "Bi-Bracelet", "tri_bracelet": "Tri-Bracelet",
+    "phiera_der_tuphello": "Phiera Der Tuphello", "eight_the_sparrow": "Eight The Sparrow",
+    "phieraggi": "Phieraggi", "cherry_bomb": "Cherry Bomb", "yatta_daikarin": "Yatta Daikarin",
 }
 
 
