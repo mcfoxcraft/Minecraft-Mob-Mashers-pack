@@ -192,6 +192,20 @@
           "type": "minecraft:model",
           "model": "foxmobmashers:decal/sparkle"
         }
+      },
+      {
+        "when": "foxmobmashers:decal/song_of_mana",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/song_of_mana"
+        }
+      },
+      {
+        "when": "foxmobmashers:decal/mannajja",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:decal/mannajja"
+        }
       }
     ],
     "fallback": {
