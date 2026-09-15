@@ -5,6 +5,27 @@
     "index": 0,
     "cases": [
       {
+        "when": "foxmobmashers:bracelet",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:item/bracelet"
+        }
+      },
+      {
+        "when": "foxmobmashers:bi_bracelet",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:item/bi_bracelet"
+        }
+      },
+      {
+        "when": "foxmobmashers:tri_bracelet",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:item/tri_bracelet"
+        }
+      },
+      {
         "when": "foxmobmashers:magic_wand",
         "model": {
           "type": "minecraft:model",

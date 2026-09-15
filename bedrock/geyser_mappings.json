@@ -81,8 +81,59 @@
       {
         "type": "definition",
         "model": "minecraft:snowball",
+        "bedrock_identifier": "foxmobmashers:bracelet",
+        "display_name": "Bracelet",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:bracelet",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:bracelet",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
+      {
+        "type": "definition",
+        "model": "minecraft:snowball",
+        "bedrock_identifier": "foxmobmashers:bi_bracelet",
+        "display_name": "Bi-Bracelet",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:bi_bracelet",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:bi_bracelet",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
+      {
+        "type": "definition",
+        "model": "minecraft:snowball",
+        "bedrock_identifier": "foxmobmashers:tri_bracelet",
+        "display_name": "Tri-Bracelet",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:tri_bracelet",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:tri_bracelet",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
+      {
+        "type": "definition",
+        "model": "minecraft:snowball",
         "bedrock_identifier": "foxmobmashers:magic_wand",
-        "display_name": "magic_wand",
+        "display_name": "Magic Wand",
         "predicate": {
           "type": "match",
           "property": "custom_model_data",
@@ -96,12 +147,103 @@
         }
       }
     ],
+    "minecraft:iron_nugget": [
+      {
+        "type": "definition",
+        "model": "minecraft:iron_nugget",
+        "bedrock_identifier": "foxmobmashers:phiera_der_tuphello",
+        "display_name": "Phiera Der Tuphello",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:phiera_der_tuphello",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:phiera_der_tuphello",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
+      {
+        "type": "definition",
+        "model": "minecraft:iron_nugget",
+        "bedrock_identifier": "foxmobmashers:eight_the_sparrow",
+        "display_name": "Eight The Sparrow",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:eight_the_sparrow",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:eight_the_sparrow",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
+      {
+        "type": "definition",
+        "model": "minecraft:iron_nugget",
+        "bedrock_identifier": "foxmobmashers:phieraggi",
+        "display_name": "Phieraggi",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:phieraggi",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:phieraggi",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:sweet_berries": [
+      {
+        "type": "definition",
+        "model": "minecraft:sweet_berries",
+        "bedrock_identifier": "foxmobmashers:cherry_bomb",
+        "display_name": "Cherry Bomb",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:cherry_bomb",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:cherry_bomb",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
+    "minecraft:beetroot": [
+      {
+        "type": "definition",
+        "model": "minecraft:beetroot",
+        "bedrock_identifier": "foxmobmashers:yatta_daikarin",
+        "display_name": "Yatta Daikarin",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:yatta_daikarin",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:yatta_daikarin",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
     "minecraft:fire_charge": [
       {
         "type": "definition",
         "model": "minecraft:fire_charge",
         "bedrock_identifier": "foxmobmashers:fire_wand",
-        "display_name": "fire_wand",
+        "display_name": "Fire Wand",
         "predicate": {
           "type": "match",
           "property": "custom_model_data",
@@ -120,7 +262,7 @@
         "type": "definition",
         "model": "minecraft:amethyst_shard",
         "bedrock_identifier": "foxmobmashers:runetracer",
-        "display_name": "runetracer",
+        "display_name": "Runetracer",
         "predicate": {
           "type": "match",
           "property": "custom_model_data",
