@@ -373,7 +373,15 @@ def extract_head_from_skin(skin_png: Image.Image) -> Image.Image:
     # the visible head downward with the rest of the group.
     paste_y = HEAD_CANVAS_H - HEAD_CONTENT_PX
     canvas.paste(head, (0, paste_y))
-    canvas.putpixel((HEAD_CONTENT_PX - 1, paste_y), (255, 255, 255, 1))
+    # Width pin: the client sizes a bitmap glyph by its rightmost column
+    # holding ANY non-zero alpha, over every row of the cell
+    # (BitmapProvider.Definition.getActualGlyphWidth), and the plugin places
+    # the head assuming HEAD_ADVANCE = 16 + 1 (HudComposer.placeElement). A
+    # skin whose right face column is transparent would shrink the advance and
+    # shift the plate's digits, so column 15 always carries an alpha=1 pixel.
+    # It sits in the padding one row ABOVE the face: it used to be written at
+    # (15, paste_y) and blanked the face's top-right pixel on every head (#23).
+    canvas.putpixel((HEAD_CONTENT_PX - 1, paste_y - 1), (255, 255, 255, 1))
     return canvas
 
 
