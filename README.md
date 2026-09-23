@@ -30,6 +30,10 @@ The HUD plates, compass, and bars are derived from a 3rd-party BetterHud-format 
 
 Codepoint allocations are the contract between this pack and the plugin's `HudGlyphs.java`. Edit both sides if you remap them.
 
+### Character heads
+
+The per-character head glyphs (U+E300…, `CHARACTER_HEAD_CODEPOINTS` in `build_hud_pack.py`) are the one HUD part not taken from the source pack: each is the face of a signed skin in `tools/character_skins.yaml`, downloaded from textures.minecraft.net. Both `build_hud_pack.py` and `build_dist.py` bake them and fail if a codepoint has no skin, because the plugin's `HudGlyphs.headCharFor` names every one of them and a codepoint with no glyph renders a blank box. The plugin's smoke pack-contract check (`tools/smoke/packcheck.py`) makes the same check against the pack it is offered. To add a character: add its skin pair to the yaml, add the next free codepoint to the table, run `tools/build_dist.py`, and release the pack before the plugin's `headCharFor` row goes live.
+
 > ⚠ The current release flow uploads `dist/foxmobmashers-resourcepack.zip` to a public CDN. If your HUD source pack's license forbids public redistribution, switch the dist target to a private host before tagging.
 
 ## Weapon sprites (VFX step 1, #5)

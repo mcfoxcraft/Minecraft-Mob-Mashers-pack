@@ -7,6 +7,8 @@
 /assets/foxmobmashers/textures/hud/
 /assets/minecraft/font/default.json
 /tools/source/
+# Skin PNGs build_character_heads downloads from textures.minecraft.net.
+/tools/skin_cache/
 
 # Python bytecode from running tools/*.py
 __pycache__/
