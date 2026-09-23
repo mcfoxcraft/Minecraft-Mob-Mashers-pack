@@ -26,6 +26,27 @@
         }
       },
       {
+        "when": "foxmobmashers:peachone_burst",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:item/peachone_burst"
+        }
+      },
+      {
+        "when": "foxmobmashers:ebony_wings_burst",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:item/ebony_wings_burst"
+        }
+      },
+      {
+        "when": "foxmobmashers:vandalier_burst",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:item/vandalier_burst"
+        }
+      },
+      {
         "when": "foxmobmashers:magic_wand",
         "model": {
           "type": "minecraft:model",

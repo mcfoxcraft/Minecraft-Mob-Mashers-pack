@@ -149,6 +149,28 @@ CART_ROWS = [
     "................",
 ]
 BLACK_BIRD = {"w": "k", "W": "K", "d": "D"}
+# A small feather bolt flying quill-last (the bird bursts, plugin #911): W vane,
+# d vane shadow, s shaft / quill, o outline. Column 7 is the shaft, so
+# split_recolor's column-8 cut gives Vandalier a white left and black right vane.
+FEATHER_ROWS = [
+    "................",
+    "................",
+    "................",
+    ".......o........",
+    "......oWo.......",
+    ".....oWsWo......",
+    ".....oWsWo......",
+    "....oWWsWdo.....",
+    "....oWWsWdo.....",
+    "....oWdsddo.....",
+    ".....odsdo......",
+    "......oso.......",
+    ".......s........",
+    ".......s........",
+    "................",
+    "................",
+]
+BLACK_FEATHER = {"W": "k", "d": "D"}
 
 # weapon id -> (vanilla item the plugin flies, model parent, palette, rows)
 # Palette letters map to RGB; '.' is transparent. Rows are exactly 16 chars.
@@ -433,6 +455,79 @@ SPRITES = {
         "......ohho......",
         "......odo.......",
         ".......o........",
+    ]),
+    # ── plugin #911 follow-ups of #894: three flown visuals #894 missed ───────
+    # Carozza!'s "Take Us Away" train, seen from above like every flown sprite
+    # (texture up = travel): a black steam locomotive (headlamp, red buffer
+    # beam, funnel blowing a white puff, brass band, red cab) pulling a blue
+    # carriage. Top-down, so it reads the same whichever way a stage camera
+    # sees it cross; nothing like Carréllo's grey side-view cart. The plugin
+    # flies it at twice the usual sprite size, the width of its sweep.
+    "carozza_train": ("minecart", "item/generated", {
+        "y": (0xFF, 0xF0, 0x80), "R": (0xE0, 0x38, 0x30), "r": (0x98, 0x18, 0x1C),
+        "k": (0x2C, 0x2A, 0x32), "K": (0x50, 0x4E, 0x5C), "L": (0x7C, 0x7A, 0x8A),
+        "s": (0x0C, 0x0C, 0x10), "b": (0xE0, 0xB0, 0x40), "W": (0xFF, 0xFF, 0xFF),
+        "w": (0xC8, 0xCC, 0xD6), "M": (0x38, 0x6C, 0xC8), "m": (0x24, 0x44, 0x88),
+        "g": (0xFF, 0xE8, 0x90), "c": (0x18, 0x16, 0x1A), "o": (0x10, 0x0C, 0x10),
+    }, [
+        "......oyyo......",
+        "....oRRRRRRo....",
+        "....okKLKkko....",
+        "....okossoko.oo.",
+        "....okossokoWWWo",
+        "....okKLKkoWWWwo",
+        "....obbbbbbowwo.",
+        "....okKLKkko.oo.",
+        "...orrrrrrrro...",
+        "...orRRRRRRro...",
+        "....oooccooo....",
+        "...oMMMMMMMMo...",
+        "...oMgMMMMgMo...",
+        "...oMMMMMMMMo...",
+        "...omgmmmmgmo...",
+        "...oooooooooo...",
+    ]),
+    # Peachone / Ebony Wings / Vandalier burst shots: a small feather bolt,
+    # drawn tiny because a flock fires dozens (they replace a thrown snowball).
+    # White and gold for Peachone, black with a red quill for Ebony Wings, and
+    # Vandalier's split like its bird: white left vane, black right vane.
+    "peachone_burst": ("snowball", "item/generated", {
+        "W": (0xFF, 0xFF, 0xF4), "d": (0xE8, 0xB8, 0xB0), "s": (0xF0, 0xC0, 0x40),
+        "o": (0x3A, 0x2A, 0x10),
+    }, FEATHER_ROWS),
+    "ebony_wings_burst": ("snowball", "item/generated", {
+        "k": (0x3A, 0x36, 0x44), "D": (0x1A, 0x18, 0x20), "s": (0xE0, 0x30, 0x30),
+        "o": (0xB8, 0x90, 0xD8),
+    }, recolor(FEATHER_ROWS, BLACK_FEATHER)),
+    "vandalier_burst": ("snowball", "item/generated", {
+        "W": (0xFF, 0xFF, 0xF4), "d": (0xE8, 0xB8, 0xB0),
+        "k": (0x3A, 0x36, 0x44), "D": (0x1A, 0x18, 0x20),
+        "s": (0xF0, 0x70, 0x40), "o": (0x3A, 0x2A, 0x2A),
+    }, split_recolor(FEATHER_ROWS, BLACK_FEATHER)),
+    # Twilight Requiem's retaliation shot: a dusky violet orb, lavender core,
+    # trailing a sunset-pink wisp — an arcana's shot, not the Fire Wand's
+    # fireball it shares a carrier with (the small fireball renders a fire charge).
+    "twilight_retaliation": ("fire_charge", "item/generated", {
+        "W": (0xF4, 0xEC, 0xFF), "c": (0xC8, 0xA8, 0xF8), "v": (0x8A, 0x5C, 0xD8),
+        "V": (0x52, 0x2E, 0x96), "p": (0xF0, 0x80, 0xA8), "P": (0xC0, 0x50, 0x88),
+        "o": (0x1C, 0x0C, 0x30),
+    }, [
+        "................",
+        "................",
+        "......oooo......",
+        ".....oWWcvo.....",
+        "....oWWccvVo....",
+        "....oWccvvVo....",
+        "....ocvvvVVo....",
+        "....opvvVVPo....",
+        ".....opVVPo.....",
+        ".....oppPPo.....",
+        "......oppo......",
+        "......oPPo......",
+        ".......PP.......",
+        ".......P........",
+        "................",
+        "................",
     ]),
     # ── #21: sprites for the vanilla-entity projectiles ──────────────────────
     # Magic Wand bolt: a blue-white teardrop flying point-first (up) with a

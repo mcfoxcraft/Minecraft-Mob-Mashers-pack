@@ -5,6 +5,13 @@
     "index": 0,
     "cases": [
       {
+        "when": "foxmobmashers:twilight_retaliation",
+        "model": {
+          "type": "minecraft:model",
+          "model": "foxmobmashers:item/twilight_retaliation"
+        }
+      },
+      {
         "when": "foxmobmashers:fire_wand",
         "model": {
           "type": "minecraft:model",

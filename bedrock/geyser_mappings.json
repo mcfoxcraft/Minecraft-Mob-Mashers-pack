@@ -132,6 +132,57 @@
       {
         "type": "definition",
         "model": "minecraft:snowball",
+        "bedrock_identifier": "foxmobmashers:peachone_burst",
+        "display_name": "Peachone Shot",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:peachone_burst",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:peachone_burst",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
+      {
+        "type": "definition",
+        "model": "minecraft:snowball",
+        "bedrock_identifier": "foxmobmashers:ebony_wings_burst",
+        "display_name": "Ebony Wings Shot",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:ebony_wings_burst",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:ebony_wings_burst",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
+      {
+        "type": "definition",
+        "model": "minecraft:snowball",
+        "bedrock_identifier": "foxmobmashers:vandalier_burst",
+        "display_name": "Vandalier Shot",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:vandalier_burst",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:vandalier_burst",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
+      {
+        "type": "definition",
+        "model": "minecraft:snowball",
         "bedrock_identifier": "foxmobmashers:magic_wand",
         "display_name": "Magic Wand",
         "predicate": {
@@ -276,7 +327,60 @@
         }
       }
     ],
+    "minecraft:minecart": [
+      {
+        "type": "definition",
+        "model": "minecraft:minecart",
+        "bedrock_identifier": "foxmobmashers:carozza_train",
+        "display_name": "Carozza! Train",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:carozza_train",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:carozza_train",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
+      {
+        "type": "definition",
+        "model": "minecraft:minecart",
+        "bedrock_identifier": "foxmobmashers:carrello",
+        "display_name": "Carrello",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:carrello",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:carrello",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      }
+    ],
     "minecraft:fire_charge": [
+      {
+        "type": "definition",
+        "model": "minecraft:fire_charge",
+        "bedrock_identifier": "foxmobmashers:twilight_retaliation",
+        "display_name": "Twilight Requiem Shot",
+        "predicate": {
+          "type": "match",
+          "property": "custom_model_data",
+          "value": "foxmobmashers:twilight_retaliation",
+          "index": 0
+        },
+        "bedrock_options": {
+          "icon": "foxmobmashers:twilight_retaliation",
+          "display_handheld": false,
+          "allow_offhand": true
+        }
+      },
       {
         "type": "definition",
         "model": "minecraft:fire_charge",
@@ -442,25 +546,6 @@
         },
         "bedrock_options": {
           "icon": "foxmobmashers:vandalier",
-          "display_handheld": false,
-          "allow_offhand": true
-        }
-      }
-    ],
-    "minecraft:minecart": [
-      {
-        "type": "definition",
-        "model": "minecraft:minecart",
-        "bedrock_identifier": "foxmobmashers:carrello",
-        "display_name": "Carrello",
-        "predicate": {
-          "type": "match",
-          "property": "custom_model_data",
-          "value": "foxmobmashers:carrello",
-          "index": 0
-        },
-        "bedrock_options": {
-          "icon": "foxmobmashers:carrello",
           "display_handheld": false,
           "allow_offhand": true
         }
