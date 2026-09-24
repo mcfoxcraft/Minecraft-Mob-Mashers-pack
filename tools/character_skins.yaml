@@ -1,7 +1,11 @@
-# Signed texture-property pairs for each character's skin. Values match the
-# character.skins section of the server's FoxMobMashers config.yml — only
-# `value` is required here (we use it to derive the skin URL); `signature`
-# is kept for reference so this file can be copy-pasted between configs.
+# Signed texture-property pairs for each character's skin. The HUD head glyph
+# is baked from the texture `url` inside each base64 `value`; `signature` is
+# not needed for that, but it is kept because the plugin ships these same
+# pairs: its jar's src/main/resources/character-skins.yml is the puppet's
+# default skin (plugin #864 / #916), so the puppet wears the face its HUD plate
+# shows. Keep the two files identical, pair for pair. Do NOT paste these into
+# a server's config.yml character.skins: an entry there overrides the jar's
+# pair, so that server would keep the old puppet skin after a redraw ships.
 #
 # One entry per CHARACTER_HEAD_CODEPOINTS id in build_hud_pack.py — the
 # build fails on a missing one, because the plugin emits every head codepoint
@@ -73,8 +77,8 @@ mortaccio:
 # so these twelve were drawn for the pack from each character's Vampire
 # Survivors select sprite and signed through MineSkin — the same path the
 # plugin's `/mm admin skin <id> <png-url>` takes. The texture itself is the
-# `url` inside the base64 `value`. Paste the same pairs into the server's
-# character.skins so the puppet wears the face the HUD shows.
+# `url` inside the base64 `value`. The plugin jar ships the same pairs as the
+# puppets' default skins (see the header); no config paste is needed.
 
 poppea:
   value: "ewogICJ0aW1lc3RhbXAiIDogMTc5MDE3MDk3NzcwMSwKICAicHJvZmlsZUlkIiA6ICJkNGUwNTFjZGRhNDU0NTUxYjk1ZWRiZjdkNTM1ZTA3ZSIsCiAgInByb2ZpbGVOYW1lIiA6ICJFbGVtZW50YWxfTWF4IiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzY0NDNlYjIyNDA0Y2Y5YmY5NDg1MDY2YTgzNjk5OTQ5MjcxMWMyOWU0MDVlOTJiOThiMmZiMTczZjc1ZjNkMDkiCiAgICB9CiAgfQp9"
