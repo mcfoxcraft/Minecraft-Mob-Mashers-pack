@@ -43,7 +43,7 @@ pack) see exactly what they see today.
 
 The weapon ids are the contract with the plugin's `weapons/WeaponVisuals.java`
 (`WeaponVisuals.model(stack, "<weapon>")`). Current set: `axe`, `cross`, `king_bible`,
-`knife`, `bone`, `peachone`, `magic_wand`, `fire_wand`, `runetracer`, the batch-2 evolutions, and batch 3 (#26): the bracelet bolts, the gun bullets, the bombs and the pinion strikes. Edit the table, run the script, and run `--check` in CI.
+`knife`, `bone`, `peachone`, `magic_wand`, `fire_wand`, `runetracer`, the batch-2 evolutions, batch 3 (#26): the bracelet bolts, the gun bullets, the bombs and the pinion strikes, and the flown visuals plugin #911 found untagged: Carozza!'s train (`carozza_train`), the bird burst shots (`peachone_burst`, `ebony_wings_burst`, `vandalier_burst`) and the Twilight Requiem retaliation (`twilight_retaliation`). Edit the table, run the script, and run `--check` in CI.
 
 `pack.mcmeta` declares `pack_format 88` with `supported_formats` 46–88 (the shape the
 FoxParkour pack ships): 1.21.11 clients are format 75 and the item definitions above need
