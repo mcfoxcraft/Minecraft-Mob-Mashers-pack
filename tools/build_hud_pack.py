@@ -185,6 +185,16 @@ CHARACTER_HEAD_CODEPOINTS = {
     "iguana":        0xE318,
     "divano":        0xE319,
     "red_death":     0xE31A,
+    # plugin #791 / #792 (the #914 stack) — the nine characters it adds
+    "space_dude":    0xE31B,
+    "she_moon":      0xE31C,
+    "santa_ladonna": 0xE31D,
+    "bat_robbert":   0xE31E,
+    "big_troubler":  0xE31F,
+    "zi_appunta":    0xE320,
+    "gazebo":        0xE321,
+    "chula_reh":     0xE322,
+    "queen_sigma":   0xE323,
 }
 # Font file prefix of the head bitmaps; tools/build_dist.py matches on it to
 # swap the head providers inside a carried-forward default.json.
