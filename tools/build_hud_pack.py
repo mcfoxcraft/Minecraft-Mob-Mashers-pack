@@ -149,9 +149,13 @@ DIGIT_BASE_TIME    = 0xE220  # 0..9 at 0xE220..0xE229, ':' at 0xE22A
 DIGIT_BASE_LEVEL   = 0xE240  # 0..9 at 0xE240..0xE249, ':' at 0xE24A
 SKULL_CODEPOINT    = 0xE3FF  # Fallback skull icon (no per-character head)
 
-# Per-character head codepoints. KEEP IN SYNC with HudGlyphs.java
-# CHARACTER_HEAD_CODEPOINTS in the plugin — the plugin looks the
-# codepoint up by character id to pick which glyph to render.
+# Per-character head codepoints. KEEP IN SYNC with HudGlyphs.headCharFor
+# in the plugin — the plugin looks the codepoint up by character id to pick
+# which glyph to render, so a row it names that is missing here renders a
+# blank box (the plugin's smoke pack-contract check, tools/smoke/packcheck.py,
+# fails on exactly that). One row per bundled character, in the plugin's
+# characters.yml order; a codepoint is never reused or renumbered — clients
+# keep an older pack cached until the url/sha1 changes.
 CHARACTER_HEAD_CODEPOINTS = {
     "antonio":   0xE300,
     "imelda":    0xE301,
@@ -168,7 +172,33 @@ CHARACTER_HEAD_CODEPOINTS = {
     "pugnala":   0xE30C,
     "giovanna":  0xE30D,
     "mortaccio": 0xE30E,
+    # #23 — the twelve that fell back to the skull
+    "poppea":        0xE30F,
+    "concetta":      0xE310,
+    "yatta_cavallo": 0xE311,
+    "leda":          0xE312,
+    "gains_boros":   0xE313,
+    "bianca":        0xE314,
+    "osole":         0xE315,
+    "ambrojoe":      0xE316,
+    "assunta":       0xE317,
+    "iguana":        0xE318,
+    "divano":        0xE319,
+    "red_death":     0xE31A,
+    # plugin #791 / #792 (the #914 stack) — the nine characters it adds
+    "space_dude":    0xE31B,
+    "she_moon":      0xE31C,
+    "santa_ladonna": 0xE31D,
+    "bat_robbert":   0xE31E,
+    "big_troubler":  0xE31F,
+    "zi_appunta":    0xE320,
+    "gazebo":        0xE321,
+    "chula_reh":     0xE322,
+    "queen_sigma":   0xE323,
 }
+# Font file prefix of the head bitmaps; tools/build_dist.py matches on it to
+# swap the head providers inside a carried-forward default.json.
+HEAD_FILE_PREFIX = "foxmobmashers:hud/heads/"
 # ── Top-left plate group ascent offsets (relative to TOP_PLATE_PADDED_HEIGHT) ──
 # Each offset is how many pixels BELOW the plate's top edge the glyph's
 # top renders. Raising TOP_PLATE_PADDED_HEIGHT lifts the whole group;
@@ -353,7 +383,17 @@ def extract_head_from_skin(skin_png: Image.Image) -> Image.Image:
     # the visible head downward with the rest of the group.
     paste_y = HEAD_CANVAS_H - HEAD_CONTENT_PX
     canvas.paste(head, (0, paste_y))
-    canvas.putpixel((HEAD_CONTENT_PX - 1, paste_y), (255, 255, 255, 1))
+    # Width pin: the client sizes a bitmap glyph by its rightmost column
+    # holding ANY non-zero alpha, over every row of the cell
+    # (BitmapProvider.Definition.getActualGlyphWidth), and the plugin places
+    # the head assuming HudGlyphs.SKULL_ADVANCE = 16 + 1 (BossBarHudService
+    # .buildName -> HudComposer.placeElement, the skull and every character
+    # head alike). A skin whose right face column is transparent would shrink
+    # the advance and shift the plate's digits, so column 15 always carries an
+    # alpha=1 pixel.
+    # It sits in the padding one row ABOVE the face: it used to be written at
+    # (15, paste_y) and blanked the face's top-right pixel on every head (#23).
+    canvas.putpixel((HEAD_CONTENT_PX - 1, paste_y - 1), (255, 255, 255, 1))
     return canvas
 
 
@@ -366,8 +406,9 @@ def build_character_heads(out_dir: Path) -> set[str]:
     try:
         import yaml  # type: ignore
     except ImportError:
-        print("character_heads: PyYAML not installed, skipping character head generation", file=sys.stderr)
-        return set()
+        # Not a skip any more: the plugin names every CHARACTER_HEAD_CODEPOINTS
+        # glyph, so a font without them renders blank boxes (#23).
+        die("character_heads: PyYAML is required to bake the head glyphs (pip install pyyaml)")
 
     tools_dir = Path(__file__).resolve().parent
     skins_path = tools_dir / "character_skins.yaml"
@@ -412,6 +453,29 @@ def build_character_heads(out_dir: Path) -> set[str]:
         produced.add(char_id)
         print(f"character_heads: {char_id} -> {out_dir / (char_id + '.png')}")
     return produced
+
+
+def require_all_heads(produced: set[str]) -> None:
+    """Every CHARACTER_HEAD_CODEPOINTS id must have a baked head: the plugin
+    emits all of those codepoints, and one with no provider draws a blank box
+    instead of the skull fallback (#23)."""
+    missing = sorted(set(CHARACTER_HEAD_CODEPOINTS) - produced)
+    if missing:
+        die(f"character_heads: no head baked for {missing} — add a skin value to "
+            "tools/character_skins.yaml (the plugin renders a blank box for these)")
+
+
+def head_providers(character_head_ids) -> list[dict]:
+    """Font providers for the per-character head glyphs, sorted by id. Shared
+    by emit_font (full build) and tools/build_dist.py (heads-only refresh) so
+    both write byte-identical entries."""
+    return [{
+        "type": "bitmap",
+        "file": f"{HEAD_FILE_PREFIX}{char_id}.png",
+        "ascent": HEAD_ASCENT,
+        "height": HEAD_CANVAS_H,
+        "chars": [chr(CHARACTER_HEAD_CODEPOINTS[char_id])],
+    } for char_id in sorted(character_head_ids)]
 
 
 def render_placeholder_skull(out_path: Path) -> None:
@@ -548,16 +612,9 @@ def emit_font(width_map: dict[int, int], character_head_ids: set[str]) -> None:
     })
 
     # Per-character head glyphs. Only emitted for characters whose skins
-    # were decoded in build_character_heads — unknown ids fall back to
-    # the placeholder skull via the plugin's character → codepoint map.
-    for char_id in sorted(character_head_ids):
-        providers.append({
-            "type": "bitmap",
-            "file": f"foxmobmashers:hud/heads/{char_id}.png",
-            "ascent": HEAD_ASCENT,
-            "height": HEAD_CANVAS_H,
-            "chars": [chr_(CHARACTER_HEAD_CODEPOINTS[char_id])],
-        })
+    # were decoded in build_character_heads (require_all_heads makes a gap
+    # fatal before we get here).
+    providers.extend(head_providers(character_head_ids))
 
     # Digit glyphs for on-plate readouts. Balance + time use 5x7 digits
     # from digits/, level uses the compact 3x5 digits from digits_small/.
@@ -697,9 +754,10 @@ def main() -> None:
         shutil.copy(skull_override, TEXTURES_OUT / "skull.png")
         print(f"override: {skull_override} -> {TEXTURES_OUT / 'skull.png'}")
 
-    # Per-character head glyphs from tools/character_skins.yaml. Skipped
-    # silently if PyYAML isn't installed or the yaml file is empty.
+    # Per-character head glyphs from tools/character_skins.yaml. Every
+    # CHARACTER_HEAD_CODEPOINTS id must get one (require_all_heads).
     produced_heads = build_character_heads(TEXTURES_OUT / "heads")
+    require_all_heads(produced_heads)
 
     # Synthesize middle connector by tiling a 1-pixel-wide plate-body
     # column from under_left.png across the hotbar gap. Column 95 is pure

@@ -30,6 +30,14 @@ The HUD plates, compass, and bars are derived from a 3rd-party BetterHud-format 
 
 Codepoint allocations are the contract between this pack and the plugin's `HudGlyphs.java`. Edit both sides if you remap them.
 
+### Character heads
+
+The per-character head glyphs (U+E300…, `CHARACTER_HEAD_CODEPOINTS` in `build_hud_pack.py`) are the one HUD part not taken from the source pack: each is the face of a signed skin in `tools/character_skins.yaml`, downloaded from textures.minecraft.net. Both `build_hud_pack.py` and `build_dist.py` bake them and fail if a codepoint has no skin, because the plugin's `HudGlyphs.headCharFor` names every one of them and a codepoint with no glyph renders a blank box. The plugin's smoke pack-contract check (`tools/smoke/packcheck.py`) makes the same check against the pack it is offered. To add a character:
+
+1. Pack: add its signed skin pair to `tools/character_skins.yaml` and the next free codepoint to `CHARACTER_HEAD_CODEPOINTS`, then run `tools/build_dist.py`.
+2. Plugin: copy the **same** `value` / `signature` into its `src/main/resources/character-skins.yml` (the puppet's default skin, so the puppet wears the face the plate shows) and add the codepoint to `HudGlyphs.CHARACTER_HEADS`. The plugin's `HudGlyphsHeadTest` and `CharacterBundledSkinsTest` fail while a character in its `characters.yml` lacks either, but nothing compares its pair with this yaml's: copy the pair, do not sign a new one.
+3. Release the pack before the plugin release carrying the new row goes live.
+
 > ⚠ The current release flow uploads `dist/foxmobmashers-resourcepack.zip` to a public CDN. If your HUD source pack's license forbids public redistribution, switch the dist target to a private host before tagging.
 
 ## Weapon sprites (VFX step 1, #5)
