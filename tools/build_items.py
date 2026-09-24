@@ -462,7 +462,8 @@ SPRITES = {
     # beam, funnel blowing a white puff, brass band, red cab) pulling a blue
     # carriage. Top-down, so it reads the same whichever way a stage camera
     # sees it cross; nothing like Carréllo's grey side-view cart. The plugin
-    # flies it at twice the usual sprite size, the width of its sweep.
+    # flies it at twice the usual sprite size, about as long as its hit
+    # circle is wide.
     "carozza_train": ("minecart", "item/generated", {
         "y": (0xFF, 0xF0, 0x80), "R": (0xE0, 0x38, 0x30), "r": (0x98, 0x18, 0x1C),
         "k": (0x2C, 0x2A, 0x32), "K": (0x50, 0x4E, 0x5C), "L": (0x7C, 0x7A, 0x8A),
